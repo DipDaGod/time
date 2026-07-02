@@ -2,7 +2,7 @@
 
 A single-file, no-dependency live clock with a mechanical split-flap board look, multiple themes, and a classic digital mode.
 
-🔗 [Visit Study Hub](https://dipdagod.github.io/time/time.html)
+🔗 [Visit Website](https://dipdagod.github.io/time/time.html)
 
 ## Features
 
