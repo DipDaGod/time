@@ -4,45 +4,50 @@
 <meta charset="UTF-8">
 <title>Local Time</title>
 <style>
-  :root { --radius: 8px; }
+  :root { --radius: 8px; --scale: 1; }
 
   /* ---------- Themes ---------- */
+  /* Flap — the original split-flap board: warm mechanical amber on charcoal */
   body[data-theme="flap"] {
-    --bg1:#1b1b1d; --bg2:#101012;
-    --card:#262628; --card-top:#2d2d30; --card-bottom:#202022;
-    --card-line: rgba(0,0,0,.55);
-    --digit:#f2ede1; --accent:#d98e3f; --accent-dim:#8a5a28;
+    --bg1:#1c1c1e; --bg2:#0c0c0e;
+    --card:#28282b; --card-top:#313134; --card-bottom:#1f1f22;
+    --card-line: rgba(0,0,0,.6);
+    --digit:#f5efe3; --accent:#e0973f; --accent-dim:#8a5a28;
     --font-digit:'Arial Black', Arial, sans-serif;
     --font-label:'Courier New', monospace;
     --radius: 8px; --glow: none;
   }
+  /* Daylight — crisp, modern, high-key */
   body[data-theme="daylight"] {
-    --bg1:#ffffff; --bg2:#e9eef0;
-    --card:#ffffff; --card-top:#ffffff; --card-bottom:#f2f5f6;
+    --bg1:#fbfbfc; --bg2:#e7ecf1;
+    --card:#ffffff; --card-top:#ffffff; --card-bottom:#eef2f5;
     --card-line: rgba(0,0,0,.08);
-    --digit:#16232b; --accent:#1f8a8a; --accent-dim:#9dc4c4;
+    --digit:#152029; --accent:#3457d5; --accent-dim:#b7c4f2;
     --font-digit:'Helvetica Neue', Arial, sans-serif;
     --font-label:'Helvetica Neue', Arial, sans-serif;
     --radius: 14px; --glow: none;
   }
-  body[data-theme="neon"] {
-    --bg1:#150022; --bg2:#020006;
-    --card:#150026; --card-top:#1d0033; --card-bottom:#0d0016;
-    --card-line: rgba(0,0,0,.7);
-    --digit:#00f0ff; --accent:#ff2fd6; --accent-dim:#7a1a66;
-    --font-digit:'Courier New', monospace;
-    --font-label:'Courier New', monospace;
-    --radius: 4px; --glow: 0 0 10px currentColor, 0 0 24px currentColor;
+  /* Midnight — a calmer, more premium take on neon: indigo glass */
+  body[data-theme="midnight"] {
+    --bg1:#10123a; --bg2:#040513;
+    --card:#181c46; --card-top:#212658; --card-bottom:#12142f;
+    --card-line: rgba(0,0,0,.6);
+    --digit:#eef1ff; --accent:#7c9bff; --accent-dim:#33397f;
+    --font-digit:'Consolas', 'Courier New', monospace;
+    --font-label:'Consolas', 'Courier New', monospace;
+    --radius: 10px; --glow: 0 0 16px rgba(124,155,255,.5);
   }
-  body[data-theme="paper"] {
-    --bg1:#f4f1ea; --bg2:#e6dfcd;
-    --card:#f8f5ed; --card-top:#faf8f1; --card-bottom:#efe9db;
+  /* Ink — warm paper with an inked stamp accent */
+  body[data-theme="ink"] {
+    --bg1:#f4f0e4; --bg2:#e4dcc6;
+    --card:#faf6ea; --card-top:#fdfaf1; --card-bottom:#f0e9d8;
     --card-line: rgba(0,0,0,.18);
-    --digit:#1a1a1a; --accent:#b3261e; --accent-dim:#d9a39e;
+    --digit:#22242c; --accent:#a3242a; --accent-dim:#dcb0b0;
     --font-digit:Georgia, 'Times New Roman', serif;
     --font-label:Georgia, serif;
-    --radius: 2px; --glow: none;
+    --radius: 3px; --glow: none;
   }
+  /* Terminal — phosphor CRT green */
   body[data-theme="terminal"] {
     --bg1:#031403; --bg2:#000000;
     --card:#001a00; --card-top:#012601; --card-bottom:#000f00;
@@ -51,6 +56,16 @@
     --font-digit:'Courier New', monospace;
     --font-label:'Courier New', monospace;
     --radius: 0px; --glow: 0 0 8px currentColor;
+  }
+  /* Sunset — dusk gradient with a coral glow */
+  body[data-theme="sunset"] {
+    --bg1:#3b1750; --bg2:#150a2c;
+    --card:#2b1044; --card-top:#3b1a5c; --card-bottom:#1c0a30;
+    --card-line: rgba(0,0,0,.55);
+    --digit:#fff3ea; --accent:#ff8b5e; --accent-dim:#8a4530;
+    --font-digit:'Segoe UI', Arial, sans-serif;
+    --font-label:'Segoe UI', Arial, sans-serif;
+    --radius: 16px; --glow: 0 0 18px rgba(255,139,94,.5);
   }
 
   * { box-sizing: border-box; }
@@ -65,74 +80,133 @@
     overflow: hidden;
     transition: background 0.4s ease;
   }
+  body[data-bg="solid"] { background: var(--bg2); }
+  body[data-bg="linear"] { background: linear-gradient(155deg, var(--bg1) 0%, var(--bg2) 100%); }
 
-  /* ---------- Controls ---------- */
+  /* ---------- Clock scale ---------- */
+  body[data-size="sm"] { --scale: 0.78; }
+  body[data-size="md"] { --scale: 1; }
+  body[data-size="lg"] { --scale: 1.22; }
+  body[data-size="xl"] { --scale: 1.46; }
+
+  body.idle-capable.idle-hidden { cursor: none; }
+
+  /* ---------- Controls ----------
+     Chrome (buttons/panel) is intentionally theme-neutral: a dark glass
+     overlay that stays legible on top of every background, light or dark. */
   .controls {
     position: fixed; top: 1.2rem; right: 1.2rem; z-index: 50;
     display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;
-    transition: opacity 0.25s ease;
+    opacity: 1; transition: opacity 0.3s ease;
   }
-  body.fs-hidden .controls { opacity: 0; pointer-events: none; }
+  body.idle-capable.idle-hidden .controls { opacity: 0; pointer-events: none; }
 
   .icon-btn {
-    width: 2.4rem; height: 2.4rem; border-radius: 50%;
-    border: 1px solid var(--accent-dim);
-    background: rgba(128,128,128,0.12); color: var(--accent);
-    font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; backdrop-filter: blur(6px);
+    width: 2.5rem; height: 2.5rem; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(18,18,22,0.55); color: #f2f2f2;
+    font-size: 1.15rem; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; backdrop-filter: blur(10px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
     transition: transform 0.15s ease, background 0.2s ease;
   }
-  .icon-btn:hover { transform: scale(1.08); background: rgba(128,128,128,0.2); }
+  .icon-btn:hover { transform: scale(1.08); background: rgba(28,28,34,0.75); }
   .icon-btn:active { transform: scale(0.95); }
 
   .panel {
-    display: none; flex-direction: column; gap: 0.9rem;
-    width: 13.5rem;
-    padding: 0.9rem;
-    border-radius: 12px;
-    background: rgba(30,30,30,0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.08);
+    display: none; flex-direction: column;
+    width: 15rem; max-height: 82vh; overflow-y: auto;
+    padding: 0.75rem 0.9rem 0.9rem;
+    border-radius: 14px;
+    background: rgba(24,24,28,0.72);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.09);
+    box-shadow: 0 16px 34px rgba(0,0,0,0.4);
   }
   .panel.open { display: flex; }
+  .panel::-webkit-scrollbar { width: 6px; }
+  .panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 
-  .panel-section { display: flex; flex-direction: column; gap: 0.4rem; }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 0.55rem; margin-bottom: 0.55rem;
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+  }
+  .panel-heading {
+    font-family: 'Courier New', monospace; font-size: 0.72rem;
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: bold; color: #fff;
+  }
+  .panel-close {
+    background: none; border: none; color: rgba(255,255,255,0.5);
+    font-size: 1.05rem; line-height: 1; cursor: pointer;
+    padding: 0.1rem 0.4rem; border-radius: 6px; transition: color .15s ease, background .15s ease;
+  }
+  .panel-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+  .panel-section { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.7rem 0; }
+  .panel-section:first-of-type { padding-top: 0; }
+  .panel-section:last-of-type { padding-bottom: 0; }
+  .panel-section + .panel-section { border-top: 1px solid rgba(255,255,255,0.07); }
   .panel-title {
     font-family: 'Courier New', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
     color: rgba(255,255,255,0.45);
     text-transform: uppercase;
   }
 
+  .theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.15rem; }
+
   .swatch-row {
-    display: flex; align-items: center; gap: 0.6rem; cursor: pointer;
-    padding: 0.2rem 0.3rem; border-radius: 8px;
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+    padding: 0.32rem 0.35rem; border-radius: 8px;
   }
-  .swatch-row:hover { background: rgba(255,255,255,0.06); }
+  .swatch-row:hover { background: rgba(255,255,255,0.07); }
   .swatch {
-    width: 1.2rem; height: 1.2rem; border-radius: 50%;
+    width: 1.15rem; height: 1.15rem; border-radius: 50%;
     border: 1px solid rgba(255,255,255,0.25); flex-shrink: 0;
   }
   .swatch-label {
-    font-family: 'Courier New', monospace; font-size: 0.72rem;
-    letter-spacing: 0.06em; color: #ddd; text-transform: uppercase;
+    font-family: 'Courier New', monospace; font-size: 0.7rem;
+    letter-spacing: 0.03em; color: #ddd; text-transform: uppercase;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  .swatch-row.active { background: rgba(255,255,255,0.06); }
   .swatch-row.active .swatch-label { color: #fff; font-weight: bold; }
-  .swatch-row.active .swatch { box-shadow: 0 0 0 2px rgba(255,255,255,0.8); }
+  .swatch-row.active .swatch { box-shadow: 0 0 0 2px rgba(255,255,255,0.85); }
+
+  .accent-row { display: flex; align-items: center; gap: 0.6rem; }
+  .custom-swatch {
+    position: relative; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; cursor: pointer;
+    overflow: hidden; background: var(--accent);
+  }
+  .custom-swatch input[type="color"] {
+    position: absolute; inset: -6px; opacity: 0; cursor: pointer; border: none; padding: 0;
+  }
+  .accent-hex {
+    font-family: 'Courier New', monospace; font-size: 0.66rem; color: rgba(255,255,255,0.55);
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .accent-reset {
+    margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.5);
+    font-size: 0.95rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .accent-reset:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
   .segmented {
     display: flex; border-radius: 8px; overflow: hidden;
     border: 1px solid rgba(255,255,255,0.15);
   }
   .segmented button {
-    flex: 1; padding: 0.4rem 0.3rem; border: none; cursor: pointer;
+    flex: 1; padding: 0.42rem 0.3rem; border: none; cursor: pointer;
     background: rgba(255,255,255,0.04); color: #ccc;
     font-family: 'Courier New', monospace; font-size: 0.68rem;
-    letter-spacing: 0.05em; text-transform: uppercase;
+    letter-spacing: 0.04em; text-transform: uppercase;
     transition: background 0.15s ease, color 0.15s ease;
   }
-  .segmented button.active { background: var(--accent); color: #000; font-weight: bold; }
+  .segmented button.active { background: var(--accent); color: #0b0b0c; font-weight: bold; }
   .segmented button:hover:not(.active) { background: rgba(255,255,255,0.1); }
 
   .switch-row {
@@ -140,10 +214,10 @@
   }
   .switch-row .swatch-label { color: #ddd; }
   .switch { position: relative; width: 2.4rem; height: 1.3rem; flex-shrink: 0; }
-  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
   .slider {
     position: absolute; inset: 0; background: rgba(255,255,255,0.15);
-    border-radius: 999px; cursor: pointer; transition: background 0.2s ease;
+    border-radius: 999px; transition: background 0.2s ease; pointer-events: none;
   }
   .slider::before {
     content: ""; position: absolute; height: 1rem; width: 1rem;
@@ -152,6 +226,24 @@
   }
   .switch input:checked + .slider { background: var(--accent); }
   .switch input:checked + .slider::before { transform: translateX(1.1rem); }
+
+  .reset-all {
+    background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6);
+    font-family: 'Courier New', monospace; font-size: 0.65rem; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 0.55rem; border-radius: 8px; cursor: pointer; width: 100%;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .reset-all:hover { color: #fff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.06); }
+
+  /* ---------- Stage / ambient glow ---------- */
+  .stage { position: relative; display: flex; align-items: center; justify-content: center; transform: scale(var(--scale)); transition: transform 0.35s ease; }
+  .stage::before {
+    content: ""; position: absolute; z-index: -1; inset: -25% -15%;
+    background: radial-gradient(circle at center, var(--accent) 0%, transparent 70%);
+    opacity: 0.14; filter: blur(70px); pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  body.no-ambient .stage::before { opacity: 0; }
 
   /* ---------- Flip board ---------- */
   .board { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
@@ -182,7 +274,7 @@
   .flip-card {
     position: absolute; inset: 0; border-radius: var(--radius);
     background: var(--card);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.03);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.4), 0 2px 0 rgba(255,255,255,0.04) inset, inset 0 0 0 1px rgba(255,255,255,0.03);
     transform-style: preserve-3d; transform-origin: center;
   }
   .flip-card.flip { animation: flap 0.32s cubic-bezier(.4,0,.2,1); }
@@ -219,6 +311,7 @@
     font-family: var(--font-label); color: var(--accent);
     letter-spacing: 0.35em; text-transform: uppercase;
     font-size: clamp(1rem, 2.2vw, 1.5rem); padding-left: 0.35em;
+    transition: opacity 0.2s ease;
   }
 
   /* ---------- Classic style ---------- */
@@ -233,33 +326,55 @@
   body[data-style="classic"] .classic-clock { display: flex; }
 </style>
 </head>
-<body data-theme="flap" data-style="flip">
+<body data-theme="flap" data-style="flip" data-size="md" data-bg="radial">
 
   <div class="controls">
-    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+    <button class="icon-btn" id="settingsBtn" title="Settings (or press S)">⚙</button>
     <div class="panel" id="settingsPanel">
+
+      <div class="panel-header">
+        <span class="panel-heading">Settings</span>
+        <button class="panel-close" id="panelCloseBtn" aria-label="Close settings">✕</button>
+      </div>
 
       <div class="panel-section">
         <div class="panel-title">Color Theme</div>
-        <div class="swatch-row" data-theme="flap">
-          <span class="swatch" style="background:linear-gradient(135deg,#262628,#d98e3f)"></span>
-          <span class="swatch-label">Flap</span>
+        <div class="theme-grid">
+          <div class="swatch-row" data-theme="flap">
+            <span class="swatch" style="background:linear-gradient(135deg,#28282b,#e0973f)"></span>
+            <span class="swatch-label">Flap</span>
+          </div>
+          <div class="swatch-row" data-theme="daylight">
+            <span class="swatch" style="background:linear-gradient(135deg,#ffffff,#3457d5)"></span>
+            <span class="swatch-label">Daylight</span>
+          </div>
+          <div class="swatch-row" data-theme="midnight">
+            <span class="swatch" style="background:linear-gradient(135deg,#181c46,#7c9bff)"></span>
+            <span class="swatch-label">Midnight</span>
+          </div>
+          <div class="swatch-row" data-theme="ink">
+            <span class="swatch" style="background:linear-gradient(135deg,#f4f0e4,#a3242a)"></span>
+            <span class="swatch-label">Ink</span>
+          </div>
+          <div class="swatch-row" data-theme="terminal">
+            <span class="swatch" style="background:linear-gradient(135deg,#001a00,#33ff66)"></span>
+            <span class="swatch-label">Terminal</span>
+          </div>
+          <div class="swatch-row" data-theme="sunset">
+            <span class="swatch" style="background:linear-gradient(135deg,#2b1044,#ff8b5e)"></span>
+            <span class="swatch-label">Sunset</span>
+          </div>
         </div>
-        <div class="swatch-row" data-theme="daylight">
-          <span class="swatch" style="background:linear-gradient(135deg,#ffffff,#1f8a8a)"></span>
-          <span class="swatch-label">Daylight</span>
-        </div>
-        <div class="swatch-row" data-theme="neon">
-          <span class="swatch" style="background:linear-gradient(135deg,#150026,#ff2fd6)"></span>
-          <span class="swatch-label">Neon</span>
-        </div>
-        <div class="swatch-row" data-theme="paper">
-          <span class="swatch" style="background:linear-gradient(135deg,#f4f1ea,#b3261e)"></span>
-          <span class="swatch-label">Paper</span>
-        </div>
-        <div class="swatch-row" data-theme="terminal">
-          <span class="swatch" style="background:linear-gradient(135deg,#001a00,#33ff66)"></span>
-          <span class="swatch-label">Terminal</span>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Accent Color</div>
+        <div class="accent-row">
+          <label class="custom-swatch" id="customSwatch" title="Pick a custom accent color">
+            <input type="color" id="accentColorInput" value="#e0973f">
+          </label>
+          <span class="accent-hex" id="accentHexLabel">THEME DEFAULT</span>
+          <button class="accent-reset" id="resetAccentBtn" title="Use theme default">↺</button>
         </div>
       </div>
 
@@ -272,15 +387,31 @@
       </div>
 
       <div class="panel-section">
+        <div class="panel-title">Clock Size</div>
+        <div class="segmented" id="sizeSeg">
+          <button data-size="sm">S</button>
+          <button data-size="md" class="active">M</button>
+          <button data-size="lg">L</button>
+          <button data-size="xl">XL</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Background</div>
+        <div class="segmented" id="bgSeg">
+          <button data-bg="radial" class="active">Glow</button>
+          <button data-bg="linear">Fade</button>
+          <button data-bg="solid">Flat</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
         <div class="panel-title">Time Format</div>
         <div class="segmented" id="formatSeg">
           <button data-format="24" class="active">24h</button>
           <button data-format="12">12h AM/PM</button>
         </div>
-      </div>
-
-      <div class="panel-section">
-        <div class="switch-row">
+        <div class="switch-row" style="margin-top:0.35rem;">
           <span class="swatch-label">Show Seconds</span>
           <label class="switch">
             <input type="checkbox" id="secondsToggle" checked>
@@ -289,33 +420,78 @@
         </div>
       </div>
 
+      <div class="panel-section">
+        <div class="switch-row">
+          <span class="swatch-label">Show Date</span>
+          <label class="switch">
+            <input type="checkbox" id="dateToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="segmented" id="dateFormatSeg" style="margin-top:0.35rem;">
+          <button data-datefmt="long" class="active">Full</button>
+          <button data-datefmt="short">Short</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="switch-row">
+          <span class="swatch-label">Ambient Glow</span>
+          <label class="switch">
+            <input type="checkbox" id="glowToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="switch-row" style="margin-top:0.35rem;">
+          <span class="swatch-label">Auto-hide UI</span>
+          <label class="switch">
+            <input type="checkbox" id="autoHideToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <button class="reset-all" id="resetAllBtn">Reset all settings</button>
+      </div>
+
     </div>
-    <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+    <button class="icon-btn" id="fullscreenBtn" title="Fullscreen (or press F)">⛶</button>
   </div>
 
-  <div class="board">
-    <div class="eyebrow">Local Time</div>
-    <div class="clock-row" id="clock-row">
-      <div class="flip-unit" id="h0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-      <div class="flip-unit" id="h1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-      <div class="colon"><span></span><span></span></div>
-      <div class="flip-unit" id="m0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-      <div class="flip-unit" id="m1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-      <div class="colon" id="secColon"><span></span><span></span></div>
-      <div class="flip-unit" id="s0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-      <div class="flip-unit" id="s1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-      <div class="ampm-badge" id="ampmBadge" style="display:none"></div>
+  <div class="stage">
+    <div class="board">
+      <div class="eyebrow">Local Time</div>
+      <div class="clock-row" id="clock-row">
+        <div class="flip-unit" id="h0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
+        <div class="flip-unit" id="h1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
+        <div class="colon"><span></span><span></span></div>
+        <div class="flip-unit" id="m0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
+        <div class="flip-unit" id="m1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
+        <div class="colon" id="secColon"><span></span><span></span></div>
+        <div class="flip-unit" id="s0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
+        <div class="flip-unit" id="s1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
+        <div class="ampm-badge" id="ampmBadge" style="display:none"></div>
+      </div>
+      <div id="date"></div>
     </div>
-    <div id="date"></div>
-  </div>
 
-  <div class="classic-clock">
-    <div id="classicTime">00:00:00</div>
-    <div id="classicDate"></div>
+    <div class="classic-clock">
+      <div id="classicTime">00:00:00</div>
+      <div id="classicDate"></div>
+    </div>
   </div>
 
 <script>
-  const state = { theme: 'flap', style: 'flip', format: '24', seconds: true };
+  const VALID_THEMES = ['flap', 'daylight', 'midnight', 'ink', 'terminal', 'sunset'];
+  const defaultState = {
+    theme: 'flap', style: 'flip', format: '24', seconds: true,
+    showDate: true, dateFormat: 'long', size: 'md', bg: 'radial',
+    glow: true, autoHide: false, accent: null
+  };
+  const state = { ...defaultState };
+  let idleTimer = null;
+  let manualImmersive = false;
 
   function pad(n) { return n.toString().padStart(2, '0'); }
 
@@ -350,7 +526,9 @@
     setDigit('m0', mm[0]); setDigit('m1', mm[1]);
     setDigit('s0', ss[0]); setDigit('s1', ss[1]);
 
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const options = state.dateFormat === 'short'
+      ? { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
+      : { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateStr = now.toLocaleDateString(undefined, options);
     document.getElementById('date').textContent = dateStr;
     document.getElementById('classicDate').textContent = dateStr;
@@ -374,26 +552,82 @@
   // ----- Settings persistence -----
   const body = document.body;
 
+  function rgbToHex(color) {
+    if (!color) return null;
+    color = color.trim();
+    if (color.startsWith('#')) return color;
+    const m = color.match(/\d+/g);
+    if (!m) return null;
+    return '#' + m.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+  }
+
   function applyState() {
     body.setAttribute('data-theme', state.theme);
     body.setAttribute('data-style', state.style);
-    document.querySelectorAll('.swatch-row').forEach(r => r.classList.toggle('active', r.dataset.theme === state.theme));
+    body.setAttribute('data-size', state.size);
+    body.setAttribute('data-bg', state.bg);
+
+    document.querySelectorAll('.swatch-row[data-theme]').forEach(r => r.classList.toggle('active', r.dataset.theme === state.theme));
     document.querySelectorAll('#styleSeg button').forEach(b => b.classList.toggle('active', b.dataset.style === state.style));
     document.querySelectorAll('#formatSeg button').forEach(b => b.classList.toggle('active', b.dataset.format === state.format));
+    document.querySelectorAll('#sizeSeg button').forEach(b => b.classList.toggle('active', b.dataset.size === state.size));
+    document.querySelectorAll('#bgSeg button').forEach(b => b.classList.toggle('active', b.dataset.bg === state.bg));
+    document.querySelectorAll('#dateFormatSeg button').forEach(b => b.classList.toggle('active', b.dataset.datefmt === state.dateFormat));
+
     document.getElementById('secondsToggle').checked = state.seconds;
     document.getElementById('secColon').style.display = state.seconds ? '' : 'none';
     document.getElementById('s0').style.display = state.seconds ? '' : 'none';
     document.getElementById('s1').style.display = state.seconds ? '' : 'none';
+
+    document.getElementById('dateToggle').checked = state.showDate;
+    document.getElementById('date').style.display = state.showDate ? '' : 'none';
+    document.getElementById('classicDate').style.display = state.showDate ? '' : 'none';
+    document.getElementById('dateFormatSeg').style.display = state.showDate ? '' : 'none';
+
+    document.getElementById('glowToggle').checked = state.glow;
+    body.classList.toggle('no-ambient', !state.glow);
+    if (state.glow) {
+      body.style.removeProperty('--glow');
+    } else {
+      body.style.setProperty('--glow', 'none');
+    }
+
+    document.getElementById('autoHideToggle').checked = state.autoHide;
+
+    // Accent override
+    const accentInput = document.getElementById('accentColorInput');
+    const customSwatch = document.getElementById('customSwatch');
+    const hexLabel = document.getElementById('accentHexLabel');
+    if (state.accent) {
+      body.style.setProperty('--accent', state.accent);
+      body.style.setProperty('--accent-dim', `color-mix(in srgb, ${state.accent} 45%, black)`);
+      accentInput.value = state.accent;
+      customSwatch.style.background = state.accent;
+      hexLabel.textContent = state.accent.toUpperCase();
+    } else {
+      body.style.removeProperty('--accent');
+      body.style.removeProperty('--accent-dim');
+      const computed = getComputedStyle(body).getPropertyValue('--accent');
+      const hex = rgbToHex(computed);
+      accentInput.value = hex || accentInput.value;
+      customSwatch.style.background = computed ? computed.trim() : '';
+      hexLabel.textContent = 'THEME DEFAULT';
+    }
+
     try { localStorage.setItem('clockState', JSON.stringify(state)); } catch (e) {}
+    refreshIdleMode();
     updateClock();
   }
 
   try {
     const saved = JSON.parse(localStorage.getItem('clockState'));
-    if (saved) Object.assign(state, saved);
+    if (saved) {
+      if (!VALID_THEMES.includes(saved.theme)) delete saved.theme;
+      Object.assign(state, saved);
+    }
   } catch (e) {}
 
-  document.querySelectorAll('.swatch-row').forEach(row => {
+  document.querySelectorAll('.swatch-row[data-theme]').forEach(row => {
     row.addEventListener('click', () => { state.theme = row.dataset.theme; applyState(); });
   });
   document.querySelectorAll('#styleSeg button').forEach(btn => {
@@ -402,43 +636,122 @@
   document.querySelectorAll('#formatSeg button').forEach(btn => {
     btn.addEventListener('click', () => { state.format = btn.dataset.format; applyState(); });
   });
+  document.querySelectorAll('#sizeSeg button').forEach(btn => {
+    btn.addEventListener('click', () => { state.size = btn.dataset.size; applyState(); });
+  });
+  document.querySelectorAll('#bgSeg button').forEach(btn => {
+    btn.addEventListener('click', () => { state.bg = btn.dataset.bg; applyState(); });
+  });
+  document.querySelectorAll('#dateFormatSeg button').forEach(btn => {
+    btn.addEventListener('click', () => { state.dateFormat = btn.dataset.datefmt; applyState(); });
+  });
   document.getElementById('secondsToggle').addEventListener('change', (e) => {
     state.seconds = e.target.checked; applyState();
   });
-
-  applyState();
+  document.getElementById('dateToggle').addEventListener('change', (e) => {
+    state.showDate = e.target.checked; applyState();
+  });
+  document.getElementById('glowToggle').addEventListener('change', (e) => {
+    state.glow = e.target.checked; applyState();
+  });
+  document.getElementById('autoHideToggle').addEventListener('change', (e) => {
+    state.autoHide = e.target.checked; applyState();
+  });
+  document.getElementById('accentColorInput').addEventListener('input', (e) => {
+    state.accent = e.target.value; applyState();
+  });
+  document.getElementById('resetAccentBtn').addEventListener('click', () => {
+    state.accent = null; applyState();
+  });
+  document.getElementById('resetAllBtn').addEventListener('click', () => {
+    Object.assign(state, defaultState);
+    applyState();
+  });
 
   // ----- Settings panel toggle -----
   const settingsBtn = document.getElementById('settingsBtn');
   const panel = document.getElementById('settingsPanel');
-  settingsBtn.addEventListener('click', () => panel.classList.toggle('open'));
+  const panelCloseBtn = document.getElementById('panelCloseBtn');
+  settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.toggle('open'); });
+  panelCloseBtn.addEventListener('click', () => panel.classList.remove('open'));
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.controls')) panel.classList.remove('open');
   });
 
-  // ----- Fullscreen (button-triggered via Fullscreen API) -----
+  // ----- Fullscreen, with a reliable fallback -----
+  // Real Fullscreen API is used when available. If it's blocked (for example
+  // inside an embedded frame that doesn't grant fullscreen permission), we
+  // fall back to a manual "immersive" mode that still hides the buttons.
   const fsBtn = document.getElementById('fullscreenBtn');
-  fsBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
+
+  function isImmersive() {
+    return !!document.fullscreenElement || manualImmersive;
+  }
+
+  function updateFsButton() {
+    const on = isImmersive();
+    fsBtn.textContent = on ? '✕' : '⛶';
+    fsBtn.title = on ? 'Exit fullscreen (or press F)' : 'Fullscreen (or press F)';
+  }
+
+  fsBtn.addEventListener('click', async () => {
+    if (document.fullscreenElement) {
+      try { await document.exitFullscreen(); } catch (e) {}
+      manualImmersive = false;
+    } else if (manualImmersive) {
+      manualImmersive = false;
+    } else if (document.documentElement.requestFullscreen) {
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch (err) {
+        manualImmersive = true;
+      }
     } else {
-      document.exitFullscreen();
+      manualImmersive = true;
     }
-  });
-  document.addEventListener('fullscreenchange', () => {
-    body.classList.toggle('fs-hidden', !!document.fullscreenElement);
+    updateFsButton();
+    refreshIdleMode();
   });
 
-  // ----- F11 / OS-level fullscreen detection -----
-  // F11 fullscreen doesn't fire the Fullscreen API events, so we detect it
-  // by comparing the window's viewport to the screen's dimensions.
-  function checkOSFullscreen() {
-    const isFS = !!document.fullscreenElement ||
-      (window.innerWidth >= screen.width - 2 && window.innerHeight >= screen.height - 2);
-    body.classList.toggle('fs-hidden', isFS);
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) manualImmersive = false;
+    updateFsButton();
+    refreshIdleMode();
+  });
+
+  // ----- Auto-hide controls while idle, in fullscreen/immersive mode or when enabled -----
+  function armIdleTimer() {
+    body.classList.remove('idle-hidden');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => body.classList.add('idle-hidden'), 2200);
   }
-  window.addEventListener('resize', checkOSFullscreen);
-  checkOSFullscreen();
+
+  function refreshIdleMode() {
+    const shouldIdle = isImmersive() || state.autoHide;
+    body.classList.toggle('idle-capable', shouldIdle);
+    clearTimeout(idleTimer);
+    if (shouldIdle) {
+      armIdleTimer();
+    } else {
+      body.classList.remove('idle-hidden');
+    }
+  }
+
+  document.addEventListener('mousemove', () => {
+    if (body.classList.contains('idle-capable')) armIdleTimer();
+  });
+  window.addEventListener('resize', refreshIdleMode);
+
+  // ----- Keyboard shortcuts -----
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+    if (e.key.toLowerCase() === 'f') fsBtn.click();
+    if (e.key.toLowerCase() === 's' && !e.metaKey && !e.ctrlKey) panel.classList.toggle('open');
+    if (e.key === 'Escape') panel.classList.remove('open');
+  });
+
+  applyState();
+  updateFsButton();
 </script>
 </body>
 </html>
