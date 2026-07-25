@@ -3,12 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <title>Local Time</title>
+<script>
+  // Apply the saved theme/style/size/background to <html> before the body
+  // ever paints, so reloading never flashes the default look first.
+  (function () {
+    var VALID_THEMES = ['flap', 'daylight', 'midnight', 'ink', 'terminal', 'sunset'];
+    var VALID_SIZES = ['sm', 'md', 'lg', 'xl'];
+    var VALID_BGS = ['radial', 'linear', 'solid'];
+    var html = document.documentElement;
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem('clockState')); } catch (e) {}
+    html.setAttribute('data-theme', (saved && VALID_THEMES.indexOf(saved.theme) !== -1) ? saved.theme : 'flap');
+    html.setAttribute('data-style', (saved && saved.style === 'classic') ? 'classic' : 'flip');
+    html.setAttribute('data-size', (saved && VALID_SIZES.indexOf(saved.size) !== -1) ? saved.size : 'md');
+    html.setAttribute('data-bg', (saved && VALID_BGS.indexOf(saved.bg) !== -1) ? saved.bg : 'radial');
+  })();
+</script>
 <style>
   :root { --radius: 8px; --scale: 1; }
 
-  /* ---------- Themes ---------- */
+  /* ---------- Themes (set on <html> so they apply before body paints) ---------- */
   /* Flap — the original split-flap board: warm mechanical amber on charcoal */
-  body[data-theme="flap"] {
+  html[data-theme="flap"] {
     --bg1:#1c1c1e; --bg2:#0c0c0e;
     --card:#28282b; --card-top:#313134; --card-bottom:#1f1f22;
     --card-line: rgba(0,0,0,.6);
@@ -18,7 +34,7 @@
     --radius: 8px; --glow: none;
   }
   /* Daylight — crisp, modern, high-key */
-  body[data-theme="daylight"] {
+  html[data-theme="daylight"] {
     --bg1:#fbfbfc; --bg2:#e7ecf1;
     --card:#ffffff; --card-top:#ffffff; --card-bottom:#eef2f5;
     --card-line: rgba(0,0,0,.08);
@@ -28,7 +44,7 @@
     --radius: 14px; --glow: none;
   }
   /* Midnight — a calmer, more premium take on neon: indigo glass */
-  body[data-theme="midnight"] {
+  html[data-theme="midnight"] {
     --bg1:#10123a; --bg2:#040513;
     --card:#181c46; --card-top:#212658; --card-bottom:#12142f;
     --card-line: rgba(0,0,0,.6);
@@ -38,7 +54,7 @@
     --radius: 10px; --glow: 0 0 16px rgba(124,155,255,.5);
   }
   /* Ink — warm paper with an inked stamp accent */
-  body[data-theme="ink"] {
+  html[data-theme="ink"] {
     --bg1:#f4f0e4; --bg2:#e4dcc6;
     --card:#faf6ea; --card-top:#fdfaf1; --card-bottom:#f0e9d8;
     --card-line: rgba(0,0,0,.18);
@@ -48,7 +64,7 @@
     --radius: 3px; --glow: none;
   }
   /* Terminal — phosphor CRT green */
-  body[data-theme="terminal"] {
+  html[data-theme="terminal"] {
     --bg1:#031403; --bg2:#000000;
     --card:#001a00; --card-top:#012601; --card-bottom:#000f00;
     --card-line: rgba(0,0,0,.8);
@@ -58,7 +74,7 @@
     --radius: 0px; --glow: 0 0 8px currentColor;
   }
   /* Sunset — dusk gradient with a coral glow */
-  body[data-theme="sunset"] {
+  html[data-theme="sunset"] {
     --bg1:#3b1750; --bg2:#150a2c;
     --card:#2b1044; --card-top:#3b1a5c; --card-bottom:#1c0a30;
     --card-line: rgba(0,0,0,.55);
@@ -78,18 +94,16 @@
     background: radial-gradient(ellipse at center, var(--bg1) 0%, var(--bg2) 75%);
     font-family: Arial, Helvetica, sans-serif;
     overflow: hidden;
-    transition: background 0.4s ease;
+    transition: background 0.5s ease;
   }
-  body[data-bg="solid"] { background: var(--bg2); }
-  body[data-bg="linear"] { background: linear-gradient(155deg, var(--bg1) 0%, var(--bg2) 100%); }
+  html[data-bg="solid"] body { background: var(--bg2); }
+  html[data-bg="linear"] body { background: linear-gradient(155deg, var(--bg1) 0%, var(--bg2) 100%); }
 
-  /* ---------- Clock scale ---------- */
-  body[data-size="sm"] { --scale: 0.78; }
-  body[data-size="md"] { --scale: 1; }
-  body[data-size="lg"] { --scale: 1.22; }
-  body[data-size="xl"] { --scale: 1.46; }
-
-  body.idle-capable.idle-hidden { cursor: none; }
+  /* ---------- Clock scale (baseline; fine-tuned live by JS to avoid overflow) ---------- */
+  html[data-size="sm"] { --scale: 0.78; }
+  html[data-size="md"] { --scale: 1; }
+  html[data-size="lg"] { --scale: 1.22; }
+  html[data-size="xl"] { --scale: 1.46; }
 
   /* ---------- Controls ----------
      Chrome (buttons/panel) is intentionally theme-neutral: a dark glass
@@ -99,7 +113,6 @@
     display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;
     opacity: 1; transition: opacity 0.3s ease;
   }
-  body.idle-capable.idle-hidden .controls { opacity: 0; pointer-events: none; }
 
   .icon-btn {
     width: 2.5rem; height: 2.5rem; border-radius: 50%;
@@ -115,7 +128,7 @@
 
   .panel {
     display: none; flex-direction: column;
-    width: 15rem; max-height: 82vh; overflow-y: auto;
+    width: 15.5rem; max-height: 82vh; overflow-y: auto;
     padding: 0.75rem 0.9rem 0.9rem;
     border-radius: 14px;
     background: rgba(24,24,28,0.72);
@@ -175,25 +188,34 @@
   .swatch-row.active .swatch-label { color: #fff; font-weight: bold; }
   .swatch-row.active .swatch { box-shadow: 0 0 0 2px rgba(255,255,255,0.85); }
 
-  .accent-row { display: flex; align-items: center; gap: 0.6rem; }
-  .custom-swatch {
-    position: relative; width: 1.6rem; height: 1.6rem; border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; cursor: pointer;
-    overflow: hidden; background: var(--accent);
+  /* ---------- Searchable timezone picker ---------- */
+  .tz-picker { position: relative; }
+  .tz-input {
+    width: 100%; padding: 0.48rem 0.6rem; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04);
+    color: #eee; font-family: 'Courier New', monospace; font-size: 0.72rem;
+    letter-spacing: 0.02em; outline: none; transition: border-color 0.15s ease;
   }
-  .custom-swatch input[type="color"] {
-    position: absolute; inset: -6px; opacity: 0; cursor: pointer; border: none; padding: 0;
+  .tz-input::placeholder { color: rgba(255,255,255,0.35); }
+  .tz-input:focus { border-color: rgba(255,255,255,0.4); }
+  .tz-results {
+    position: absolute; left: 0; right: 0; top: calc(100% + 4px);
+    max-height: 11rem; overflow-y: auto;
+    background: rgba(18,18,22,0.98); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,0.4);
+    display: none; z-index: 5;
   }
-  .accent-hex {
-    font-family: 'Courier New', monospace; font-size: 0.66rem; color: rgba(255,255,255,0.55);
-    letter-spacing: 0.05em; text-transform: uppercase;
+  .tz-results.open { display: block; }
+  .tz-result {
+    padding: 0.4rem 0.6rem; font-family: 'Courier New', monospace; font-size: 0.68rem;
+    color: #ddd; cursor: pointer; display: flex; justify-content: space-between; gap: 0.5rem;
   }
-  .accent-reset {
-    margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.5);
-    font-size: 0.95rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 6px;
-    transition: color 0.15s ease, background 0.15s ease;
+  .tz-result:hover { background: rgba(255,255,255,0.08); }
+  .tz-offset { color: rgba(255,255,255,0.4); flex-shrink: 0; }
+  .tz-current {
+    font-family: 'Courier New', monospace; font-size: 0.62rem;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.03em;
   }
-  .accent-reset:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
   .segmented {
     display: flex; border-radius: 8px; overflow: hidden;
@@ -236,12 +258,15 @@
   .reset-all:hover { color: #fff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.06); }
 
   /* ---------- Stage / ambient glow ---------- */
-  .stage { position: relative; display: flex; align-items: center; justify-content: center; transform: scale(var(--scale)); transition: transform 0.35s ease; }
+  .stage {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    transform: scale(var(--scale)); transition: transform 0.35s ease;
+  }
   .stage::before {
     content: ""; position: absolute; z-index: -1; inset: -25% -15%;
     background: radial-gradient(circle at center, var(--accent) 0%, transparent 70%);
     opacity: 0.14; filter: blur(70px); pointer-events: none;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease, background 0.5s ease;
   }
   body.no-ambient .stage::before { opacity: 0; }
 
@@ -252,6 +277,7 @@
     font-family: var(--font-label); color: var(--accent);
     letter-spacing: 0.5em; font-size: clamp(0.7rem, 1.4vw, 0.95rem);
     text-transform: uppercase; padding-left: 0.5em; text-shadow: var(--glow);
+    transition: color 0.5s ease;
   }
 
   .clock-row { display: flex; align-items: center; gap: clamp(0.4rem, 1.2vw, 0.9rem); }
@@ -264,6 +290,7 @@
     width: clamp(6px, 0.9vw, 10px); height: clamp(6px, 0.9vw, 10px);
     border-radius: 50%; background: var(--accent);
     box-shadow: 0 0 10px var(--accent); animation: pulse 1s ease-in-out infinite;
+    transition: background 0.5s ease, box-shadow 0.5s ease;
   }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
@@ -276,6 +303,7 @@
     background: var(--card);
     box-shadow: 0 10px 22px rgba(0,0,0,0.4), 0 2px 0 rgba(255,255,255,0.04) inset, inset 0 0 0 1px rgba(255,255,255,0.03);
     transform-style: preserve-3d; transform-origin: center;
+    transition: background 0.5s ease, border-radius 0.5s ease;
   }
   .flip-card.flip { animation: flap 0.32s cubic-bezier(.4,0,.2,1); }
   @keyframes flap { 0% { transform: rotateX(0deg); } 45% { transform: rotateX(-12deg); } 100% { transform: rotateX(0deg); } }
@@ -284,12 +312,14 @@
   .half.top {
     top: 0; align-items: flex-start; border-radius: var(--radius) var(--radius) 0 0;
     background: linear-gradient(to bottom, var(--card-top), var(--card) 90%);
+    transition: background 0.5s ease, border-radius 0.5s ease;
   }
   .half.bottom {
     bottom: 0; align-items: flex-end; border-radius: 0 0 var(--radius) var(--radius);
     background: linear-gradient(to top, var(--card-bottom), var(--card) 90%);
+    transition: background 0.5s ease, border-radius 0.5s ease;
   }
-  .half::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: var(--card-line); }
+  .half::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: var(--card-line); transition: background 0.5s ease; }
   .half.top::after { bottom: 0; }
   .half.bottom::after { top: 0; }
 
@@ -298,6 +328,7 @@
     line-height: clamp(3.4rem, 12vw, 8.2rem); color: var(--digit);
     font-family: var(--font-digit); letter-spacing: -0.02em; user-select: none;
     text-shadow: var(--glow);
+    transition: color 0.5s ease;
   }
   .half.bottom span { margin-top: calc(-1 * clamp(3.4rem, 12vw, 8.2rem)); }
 
@@ -305,28 +336,36 @@
     font-family: var(--font-label); color: var(--accent);
     letter-spacing: 0.15em; font-size: clamp(0.9rem, 2vw, 1.2rem);
     align-self: flex-end; margin-left: 0.3rem; text-shadow: var(--glow);
+    transition: color 0.5s ease;
   }
 
   #date, #classicDate {
     font-family: var(--font-label); color: var(--accent);
     letter-spacing: 0.35em; text-transform: uppercase;
     font-size: clamp(1rem, 2.2vw, 1.5rem); padding-left: 0.35em;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, color 0.5s ease;
   }
 
   /* ---------- Classic style ---------- */
   .classic-clock { display: none; flex-direction: column; align-items: center; gap: 1rem; }
   #classicTime {
     font-size: clamp(3rem, 12vw, 10rem); font-weight: 700; color: var(--digit);
-    letter-spacing: 0.05em; text-shadow: var(--glow); font-variant-numeric: tabular-nums;
-    font-family: var(--font-digit); user-select: none;
+    letter-spacing: 0.05em; font-variant-numeric: tabular-nums;
+    font-family: var(--font-digit); user-select: none; white-space: nowrap;
+    transition: color 0.5s ease;
+  }
+  #classicDigits { text-shadow: var(--glow); }
+  .classic-ampm {
+    font-size: 0.26em; letter-spacing: 0.12em; margin-left: 0.35em;
+    color: var(--accent); font-family: var(--font-label); text-shadow: none;
+    vertical-align: middle; transition: color 0.5s ease;
   }
 
-  body[data-style="classic"] .board { display: none; }
-  body[data-style="classic"] .classic-clock { display: flex; }
+  html[data-style="classic"] .board { display: none; }
+  html[data-style="classic"] .classic-clock { display: flex; }
 </style>
 </head>
-<body data-theme="flap" data-style="flip" data-size="md" data-bg="radial">
+<body>
 
   <div class="controls">
     <button class="icon-btn" id="settingsBtn" title="Settings (or press S)">⚙</button>
@@ -368,14 +407,12 @@
       </div>
 
       <div class="panel-section">
-        <div class="panel-title">Accent Color</div>
-        <div class="accent-row">
-          <label class="custom-swatch" id="customSwatch" title="Pick a custom accent color">
-            <input type="color" id="accentColorInput" value="#e0973f">
-          </label>
-          <span class="accent-hex" id="accentHexLabel">THEME DEFAULT</span>
-          <button class="accent-reset" id="resetAccentBtn" title="Use theme default">↺</button>
+        <div class="panel-title">Timezone</div>
+        <div class="tz-picker">
+          <input type="text" id="tzSearch" class="tz-input" placeholder="Search city or timezone…" autocomplete="off" spellcheck="false">
+          <div class="tz-results" id="tzResults"></div>
         </div>
+        <div class="tz-current" id="tzCurrent">Showing local time</div>
       </div>
 
       <div class="panel-section">
@@ -442,13 +479,6 @@
             <span class="slider"></span>
           </label>
         </div>
-        <div class="switch-row" style="margin-top:0.35rem;">
-          <span class="swatch-label">Auto-hide UI</span>
-          <label class="switch">
-            <input type="checkbox" id="autoHideToggle">
-            <span class="slider"></span>
-          </label>
-        </div>
       </div>
 
       <div class="panel-section">
@@ -477,21 +507,20 @@
     </div>
 
     <div class="classic-clock">
-      <div id="classicTime">00:00:00</div>
+      <div id="classicTime"><span id="classicDigits">00:00:00</span><span class="classic-ampm" id="classicAmpm"></span></div>
       <div id="classicDate"></div>
     </div>
   </div>
 
 <script>
   const VALID_THEMES = ['flap', 'daylight', 'midnight', 'ink', 'terminal', 'sunset'];
+  const SIZE_SCALE = { sm: 0.78, md: 1, lg: 1.22, xl: 1.46 };
   const defaultState = {
     theme: 'flap', style: 'flip', format: '24', seconds: true,
     showDate: true, dateFormat: 'long', size: 'md', bg: 'radial',
-    glow: true, autoHide: false, accent: null
+    glow: true, timezone: ''
   };
   const state = { ...defaultState };
-  let idleTimer = null;
-  let manualImmersive = false;
 
   function pad(n) { return n.toString().padStart(2, '0'); }
 
@@ -508,9 +537,15 @@
 
   function updateClock() {
     const now = new Date();
-    let h24 = now.getHours();
-    const mm = pad(now.getMinutes());
-    const ss = pad(now.getSeconds());
+    const tz = state.timezone || undefined;
+
+    const timeParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).formatToParts(now).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
+
+    let h24 = parseInt(timeParts.hour, 10);
+    const mm = timeParts.minute;
+    const ss = timeParts.second;
     const ampm = h24 >= 12 ? 'PM' : 'AM';
 
     let hh;
@@ -526,10 +561,10 @@
     setDigit('m0', mm[0]); setDigit('m1', mm[1]);
     setDigit('s0', ss[0]); setDigit('s1', ss[1]);
 
-    const options = state.dateFormat === 'short'
-      ? { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
-      : { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateStr = now.toLocaleDateString(undefined, options);
+    const dateOptions = state.dateFormat === 'short'
+      ? { timeZone: tz, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
+      : { timeZone: tz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = new Intl.DateTimeFormat(undefined, dateOptions).format(now);
     document.getElementById('date').textContent = dateStr;
     document.getElementById('classicDate').textContent = dateStr;
 
@@ -543,29 +578,108 @@
 
     let classicStr = `${hh}:${mm}`;
     if (state.seconds) classicStr += `:${ss}`;
-    if (state.format === '12') classicStr += ` ${ampm}`;
-    document.getElementById('classicTime').textContent = classicStr;
+    document.getElementById('classicDigits').textContent = classicStr;
+    document.getElementById('classicAmpm').textContent = state.format === '12' ? ampm : '';
   }
   updateClock();
   setInterval(updateClock, 1000);
 
   // ----- Settings persistence -----
+  const root = document.documentElement;
   const body = document.body;
 
-  function rgbToHex(color) {
-    if (!color) return null;
-    color = color.trim();
-    if (color.startsWith('#')) return color;
-    const m = color.match(/\d+/g);
-    if (!m) return null;
-    return '#' + m.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+  const FALLBACK_ZONES = [
+    'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+    'America/Sao_Paulo', 'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Moscow',
+    'Africa/Cairo', 'Africa/Johannesburg', 'Asia/Dubai', 'Asia/Kolkata', 'Asia/Bangkok',
+    'Asia/Shanghai', 'Asia/Tokyo', 'Asia/Seoul', 'Australia/Sydney', 'Pacific/Auckland'
+  ];
+  let ALL_ZONES = FALLBACK_ZONES;
+  try {
+    if (typeof Intl.supportedValuesOf === 'function') ALL_ZONES = Intl.supportedValuesOf('timeZone');
+  } catch (e) {}
+
+  function zoneDisplayName(zone) {
+    return zone.split('/').pop().replace(/_/g, ' ');
+  }
+  function zoneOffsetLabel(zone) {
+    try {
+      const part = new Intl.DateTimeFormat('en-US', { timeZone: zone, timeZoneName: 'shortOffset' })
+        .formatToParts(new Date()).find(p => p.type === 'timeZoneName');
+      return part ? part.value : '';
+    } catch (e) { return ''; }
+  }
+
+  const tzSearch = document.getElementById('tzSearch');
+  const tzResults = document.getElementById('tzResults');
+
+  function renderTzResults(query) {
+    tzResults.innerHTML = '';
+    const q = query.trim().toLowerCase();
+    let matches;
+    if (!q) {
+      matches = ['', ...FALLBACK_ZONES.slice(0, 8)];
+    } else {
+      matches = ALL_ZONES.filter(z => z.toLowerCase().replace(/_/g, ' ').includes(q));
+      if ('local'.includes(q) || 'device'.includes(q)) matches.unshift('');
+      matches = matches.slice(0, 8);
+    }
+    matches.forEach(z => {
+      const row = document.createElement('div');
+      row.className = 'tz-result';
+      const label = document.createElement('span');
+      label.textContent = z === '' ? 'Local (device)' : `${zoneDisplayName(z)} — ${z}`;
+      const offset = document.createElement('span');
+      offset.className = 'tz-offset';
+      offset.textContent = z === '' ? '' : zoneOffsetLabel(z);
+      row.appendChild(label);
+      row.appendChild(offset);
+      row.addEventListener('click', () => {
+        state.timezone = z;
+        applyState();
+        tzResults.classList.remove('open');
+        tzSearch.blur();
+      });
+      tzResults.appendChild(row);
+    });
+    tzResults.classList.toggle('open', matches.length > 0);
+  }
+  tzSearch.addEventListener('input', (e) => renderTzResults(e.target.value));
+  tzSearch.addEventListener('focus', (e) => renderTzResults(e.target.value));
+  tzSearch.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { tzResults.classList.remove('open'); e.stopPropagation(); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.tz-picker')) tzResults.classList.remove('open');
+  });
+
+  function updateEyebrow() {
+    const el = document.querySelector('.eyebrow');
+    el.textContent = state.timezone ? zoneDisplayName(state.timezone) : 'Local Time';
+  }
+
+  // Keeps the clock's on-screen size from ever overflowing the viewport,
+  // no matter which Clock Size is selected or how narrow the window is.
+  function fitToScreen() {
+    const activeEl = state.style === 'classic'
+      ? document.querySelector('.classic-clock')
+      : document.querySelector('.board');
+    if (!activeEl) return;
+    const naturalWidth = activeEl.offsetWidth;
+    const naturalHeight = activeEl.offsetHeight;
+    if (!naturalWidth || !naturalHeight) return;
+    const baseScale = SIZE_SCALE[state.size] || 1;
+    const maxByWidth = (window.innerWidth * 0.92) / naturalWidth;
+    const maxByHeight = (window.innerHeight * 0.85) / naturalHeight;
+    const applied = Math.min(baseScale, maxByWidth, maxByHeight);
+    root.style.setProperty('--scale', applied > 0 ? applied : baseScale);
   }
 
   function applyState() {
-    body.setAttribute('data-theme', state.theme);
-    body.setAttribute('data-style', state.style);
-    body.setAttribute('data-size', state.size);
-    body.setAttribute('data-bg', state.bg);
+    root.setAttribute('data-theme', state.theme);
+    root.setAttribute('data-style', state.style);
+    root.setAttribute('data-size', state.size);
+    root.setAttribute('data-bg', state.bg);
 
     document.querySelectorAll('.swatch-row[data-theme]').forEach(r => r.classList.toggle('active', r.dataset.theme === state.theme));
     document.querySelectorAll('#styleSeg button').forEach(b => b.classList.toggle('active', b.dataset.style === state.style));
@@ -587,36 +701,21 @@
     document.getElementById('glowToggle').checked = state.glow;
     body.classList.toggle('no-ambient', !state.glow);
     if (state.glow) {
-      body.style.removeProperty('--glow');
+      root.style.removeProperty('--glow');
     } else {
-      body.style.setProperty('--glow', 'none');
+      root.style.setProperty('--glow', 'none');
     }
 
-    document.getElementById('autoHideToggle').checked = state.autoHide;
-
-    // Accent override
-    const accentInput = document.getElementById('accentColorInput');
-    const customSwatch = document.getElementById('customSwatch');
-    const hexLabel = document.getElementById('accentHexLabel');
-    if (state.accent) {
-      body.style.setProperty('--accent', state.accent);
-      body.style.setProperty('--accent-dim', `color-mix(in srgb, ${state.accent} 45%, black)`);
-      accentInput.value = state.accent;
-      customSwatch.style.background = state.accent;
-      hexLabel.textContent = state.accent.toUpperCase();
-    } else {
-      body.style.removeProperty('--accent');
-      body.style.removeProperty('--accent-dim');
-      const computed = getComputedStyle(body).getPropertyValue('--accent');
-      const hex = rgbToHex(computed);
-      accentInput.value = hex || accentInput.value;
-      customSwatch.style.background = computed ? computed.trim() : '';
-      hexLabel.textContent = 'THEME DEFAULT';
-    }
+    tzSearch.value = state.timezone ? zoneDisplayName(state.timezone) : '';
+    document.getElementById('tzCurrent').textContent = state.timezone
+      ? `Showing ${state.timezone} (${zoneOffsetLabel(state.timezone)})`
+      : 'Showing local time';
+    updateEyebrow();
 
     try { localStorage.setItem('clockState', JSON.stringify(state)); } catch (e) {}
     refreshIdleMode();
     updateClock();
+    fitToScreen();
   }
 
   try {
@@ -654,15 +753,6 @@
   document.getElementById('glowToggle').addEventListener('change', (e) => {
     state.glow = e.target.checked; applyState();
   });
-  document.getElementById('autoHideToggle').addEventListener('change', (e) => {
-    state.autoHide = e.target.checked; applyState();
-  });
-  document.getElementById('accentColorInput').addEventListener('input', (e) => {
-    state.accent = e.target.value; applyState();
-  });
-  document.getElementById('resetAccentBtn').addEventListener('click', () => {
-    state.accent = null; applyState();
-  });
   document.getElementById('resetAllBtn').addEventListener('click', () => {
     Object.assign(state, defaultState);
     applyState();
@@ -678,80 +768,65 @@
     if (!e.target.closest('.controls')) panel.classList.remove('open');
   });
 
-  // ----- Fullscreen, with a reliable fallback -----
-  // Real Fullscreen API is used when available. If it's blocked (for example
-  // inside an embedded frame that doesn't grant fullscreen permission), we
-  // fall back to a manual "immersive" mode that still hides the buttons.
-  const fsBtn = document.getElementById('fullscreenBtn');
+// ----- Fullscreen -----
+const fsBtn = document.getElementById("fullscreenBtn");
+const controls = document.querySelector(".controls");
 
-  function isImmersive() {
-    return !!document.fullscreenElement || manualImmersive;
-  }
+function isFullscreen() {
+  return !!document.fullscreenElement ||
+         (window.innerWidth >= screen.width - 2 &&
+          window.innerHeight >= screen.height - 2);
+}
 
-  function updateFsButton() {
-    const on = isImmersive();
-    fsBtn.textContent = on ? '✕' : '⛶';
-    fsBtn.title = on ? 'Exit fullscreen (or press F)' : 'Fullscreen (or press F)';
-  }
+function updateFullscreenUI() {
+  const fullscreen = isFullscreen();
 
-  fsBtn.addEventListener('click', async () => {
+  controls.style.display = fullscreen ? "none" : "flex";
+
+  fsBtn.textContent = fullscreen ? "✕" : "⛶";
+  fsBtn.title = fullscreen
+    ? "Exit fullscreen (or press F)"
+    : "Fullscreen (or press F)";
+}
+
+async function toggleFullscreen() {
+  try {
     if (document.fullscreenElement) {
-      try { await document.exitFullscreen(); } catch (e) {}
-      manualImmersive = false;
-    } else if (manualImmersive) {
-      manualImmersive = false;
-    } else if (document.documentElement.requestFullscreen) {
-      try {
-        await document.documentElement.requestFullscreen();
-      } catch (err) {
-        manualImmersive = true;
-      }
+      await document.exitFullscreen();
     } else {
-      manualImmersive = true;
+      await document.documentElement.requestFullscreen();
     }
-    updateFsButton();
-    refreshIdleMode();
-  });
-
-  document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement) manualImmersive = false;
-    updateFsButton();
-    refreshIdleMode();
-  });
-
-  // ----- Auto-hide controls while idle, in fullscreen/immersive mode or when enabled -----
-  function armIdleTimer() {
-    body.classList.remove('idle-hidden');
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => body.classList.add('idle-hidden'), 2200);
+  } catch (err) {
+    console.error(err);
   }
 
-  function refreshIdleMode() {
-    const shouldIdle = isImmersive() || state.autoHide;
-    body.classList.toggle('idle-capable', shouldIdle);
-    clearTimeout(idleTimer);
-    if (shouldIdle) {
-      armIdleTimer();
-    } else {
-      body.classList.remove('idle-hidden');
-    }
+  updateFullscreenUI();
+}
+
+fsBtn.addEventListener("click", toggleFullscreen);
+
+document.addEventListener("fullscreenchange", updateFullscreenUI);
+window.addEventListener("resize", updateFullscreenUI);
+
+// ----- Keyboard shortcuts -----
+document.addEventListener("keydown", (e) => {
+  if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
+
+  switch (e.key.toLowerCase()) {
+    case "f":
+      e.preventDefault();
+      toggleFullscreen();
+      break;
+
+    case "escape":
+      panel.classList.remove("open");
+      break;
   }
+});
 
-  document.addEventListener('mousemove', () => {
-    if (body.classList.contains('idle-capable')) armIdleTimer();
-  });
-  window.addEventListener('resize', refreshIdleMode);
-
-  // ----- Keyboard shortcuts -----
-  document.addEventListener('keydown', (e) => {
-    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
-    if (e.key.toLowerCase() === 'f') fsBtn.click();
-    if (e.key.toLowerCase() === 's' && !e.metaKey && !e.ctrlKey) panel.classList.toggle('open');
-    if (e.key === 'Escape') panel.classList.remove('open');
-  });
-
-  applyState();
-  updateFsButton();
+// Initialize
+applyState();
+updateFullscreenUI();
 </script>
 </body>
 </html>
