@@ -1,69 +1,94 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="flap" data-size="md">
+<html lang="en" data-theme="neon" data-size="md">
 <head>
 <meta charset="UTF-8">
 <title>Local Time</title>
 <style>
-  :root { --scale: 1; }
+  :root { --scale: 1; --blur: none; --border: none; }
 
-  /* ---------- Flap — split-flap departure board: bronze on charcoal ---------- */
-  html[data-theme="flap"] {
-    --bg1:#1c1c1e; --bg2:#0b0b0d;
-    --card:#26262a; --card-top:#303034; --card-bottom:#1d1d20;
-    --card-line: rgba(0,0,0,.6);
-    --digit:#f2ece0; --accent:#c97a2b;
+  /* ---------- Neon Glow — near-black purple, magenta bloom ---------- */
+  html[data-theme="neon"] {
+    --bg1:#1a0a2e; --bg2:#05020a;
+    --card: rgba(38,10,58,0.55); --card-top: rgba(55,16,82,0.55); --card-bottom: rgba(24,6,42,0.55);
+    --card-line: rgba(255,255,255,0.14);
+    --digit:#f6ecff; --accent:#e838d1;
     --font-digit:'Arial Black', Arial, sans-serif;
     --font-label:'Courier New', monospace;
-    --radius:6px; --card-shadow: 0 10px 22px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03);
-    --glow:none; --border:none;
+    --radius:16px;
+    --card-shadow: 0 0 28px rgba(232,56,209,.35), 0 0 58px rgba(150,50,255,.18), inset 0 0 0 1px rgba(255,255,255,.04);
+    --glow: 0 0 10px rgba(246,236,255,.55);
+    --border: 1px solid rgba(232,56,209,.55);
   }
 
-  /* ---------- Newsprint — letterpress broadsheet: oxblood on cream paper ---------- */
-  html[data-theme="newsprint"] {
-    --bg1:#ece5d3; --bg2:#d8cfb4;
-    --card:#f7f2e4; --card-top:#fbf8ee; --card-bottom:#efe8d5;
-    --card-line: rgba(0,0,0,.16);
-    --digit:#211c14; --accent:#8a2a20;
-    --font-digit:Georgia, 'Times New Roman', serif;
-    --font-label:Georgia, serif;
-    --radius:2px; --card-shadow: 0 3px 0 rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.06);
-    --glow:none; --border:none;
-  }
-
-  /* ---------- Terminal — CRT phosphor: green on black, scanlines ---------- */
-  html[data-theme="terminal"] {
-    --bg1:#020a02; --bg2:#000000;
-    --card:#001400; --card-top:#012000; --card-bottom:#000c00;
-    --card-line: rgba(0,0,0,.85);
-    --digit:#2ee65f; --accent:#2ee65f;
-    --font-digit:'Courier New', monospace;
-    --font-label:'Courier New', monospace;
-    --radius:0px; --card-shadow: 0 0 0 1px rgba(46,230,95,.08);
-    --glow: 0 0 9px currentColor; --border:none;
-  }
-
-  /* ---------- Porcelain — flat museum white: graphite ink, denim accent ---------- */
-  html[data-theme="porcelain"] {
-    --bg1:#fbfbfa; --bg2:#ebe9e3;
-    --card:#ffffff; --card-top:#ffffff; --card-bottom:#f2f0ea;
-    --card-line: rgba(0,0,0,.08);
-    --digit:#14181c; --accent:#2454a6;
+  /* ---------- Glassmorph — frosted glass on dark navy ---------- */
+  html[data-theme="glass"] {
+    --bg1:#0c1220; --bg2:#050810;
+    --card: rgba(110,130,160,0.16); --card-top: rgba(140,160,190,0.22); --card-bottom: rgba(70,85,110,0.14);
+    --card-line: rgba(255,255,255,0.18);
+    --digit:#eef4ff; --accent:#9cc6ff;
     --font-digit:'Helvetica Neue', Arial, sans-serif;
     --font-label:'Helvetica Neue', Arial, sans-serif;
-    --radius:10px; --card-shadow: none;
-    --glow:none; --border:1px solid rgba(0,0,0,.09);
+    --radius:22px;
+    --card-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15);
+    --glow: 0 0 8px rgba(120,170,255,.4);
+    --border: 1px solid rgba(255,255,255,.2);
+    --blur: blur(18px);
   }
 
-  /* ---------- Dusk — plum-to-indigo gradient, coral glow ---------- */
-  html[data-theme="dusk"] {
-    --bg1:#2c1240; --bg2:#120821;
-    --card:#241238; --card-top:#331a4c; --card-bottom:#170a26;
-    --card-line: rgba(0,0,0,.5);
-    --digit:#fbe9dd; --accent:#ef8b5b;
-    --font-digit:'Trebuchet MS', 'Segoe UI', sans-serif;
-    --font-label:'Trebuchet MS', 'Segoe UI', sans-serif;
-    --radius:18px; --card-shadow: 0 12px 26px rgba(0,0,0,.45);
-    --glow: 0 0 16px rgba(239,139,91,.55); --border:none;
+  /* ---------- Retro Amber — warm brown-black, incandescent glow ---------- */
+  html[data-theme="amber"] {
+    --bg1:#241207; --bg2:#0c0602;
+    --card:#2a180d; --card-top:#3c2513; --card-bottom:#1c1008;
+    --card-line: rgba(0,0,0,.55);
+    --digit:#ffbd63; --accent:#ff9a2e;
+    --font-digit:'Courier New', monospace;
+    --font-label:'Courier New', monospace;
+    --radius:8px;
+    --card-shadow: 0 10px 24px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.03);
+    --glow: 0 0 16px rgba(255,150,45,.6);
+  }
+
+  /* ---------- Minimal Mono — flat charcoal, no color, no glow ---------- */
+  html[data-theme="mono"] {
+    --bg1:#141414; --bg2:#141414;
+    --card:#1c1c1c; --card-top:#212121; --card-bottom:#171717;
+    --card-line: rgba(255,255,255,.08);
+    --digit:#e9e9e9; --accent:#9a9a9a;
+    --font-digit:'Helvetica Neue', Arial, sans-serif;
+    --font-label:'Helvetica Neue', Arial, sans-serif;
+    --radius:10px;
+    --card-shadow: 0 4px 10px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.05);
+    --glow: none;
+    --border: 1px solid rgba(255,255,255,.06);
+  }
+
+  /* ---------- Ocean Breeze — deep navy, cyan glass ---------- */
+  html[data-theme="ocean"] {
+    --bg1:#06202f; --bg2:#020d15;
+    --card: rgba(10,45,66,0.5); --card-top: rgba(18,65,92,0.5); --card-bottom: rgba(6,28,42,0.5);
+    --card-line: rgba(255,255,255,0.14);
+    --digit:#eafcff; --accent:#4dd9ec;
+    --font-digit:'Helvetica Neue', Arial, sans-serif;
+    --font-label:'Helvetica Neue', Arial, sans-serif;
+    --radius:18px;
+    --card-shadow: 0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08);
+    --glow: 0 0 10px rgba(90,220,255,.4);
+    --border: 1px solid rgba(90,220,255,.35);
+    --blur: blur(10px);
+  }
+
+  /* ---------- Cyber Grid — black-green HUD, tech grid ---------- */
+  html[data-theme="cyber"] {
+    --bg1:#030a05; --bg2:#000000;
+    --card: rgba(5,28,16,0.45); --card-top: rgba(8,40,22,0.45); --card-bottom: rgba(3,18,10,0.45);
+    --card-line: rgba(0,0,0,.6);
+    --digit:#9dffb0; --accent:#4fff8f;
+    --font-digit:'Courier New', monospace;
+    --font-label:'Courier New', monospace;
+    --radius:4px;
+    --card-shadow: 0 0 18px rgba(79,255,143,.18), inset 0 0 0 1px rgba(79,255,143,.1);
+    --glow: 0 0 8px currentColor;
+    --border: 1px solid rgba(79,255,143,.35);
   }
 
   * { box-sizing: border-box; }
@@ -78,13 +103,15 @@
     transition: background .5s ease;
   }
 
-  /* CRT scanlines, only for the terminal theme */
-  html[data-theme="terminal"] body::after {
-    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 40;
-    background: repeating-linear-gradient(
-      to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.15) 3px
-    );
-    mix-blend-mode: multiply;
+  /* Cyber Grid HUD lines behind the clock */
+  html[data-theme="cyber"] .stage::after {
+    content: ""; position: absolute; inset: -35% -25%; z-index: -2; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(79,255,143,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,255,143,.07) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
   }
 
   /* ---------- Controls ---------- */
@@ -123,7 +150,7 @@
   .swatch-row { display: flex; align-items: center; gap: .5rem; cursor: pointer; padding: .32rem .35rem; border-radius: 8px; }
   .swatch-row:hover { background: rgba(255,255,255,.07); }
   .swatch { width: 1.15rem; height: 1.15rem; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
-  .swatch-label { font-family: 'Courier New', monospace; font-size: .68rem; color: #ddd; }
+  .swatch-label { font-family: 'Courier New', monospace; font-size: .66rem; color: #ddd; }
   .swatch-row.active { background: rgba(255,255,255,.06); }
   .swatch-row.active .swatch-label { color: #fff; font-weight: bold; }
   .swatch-row.active .swatch { box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
@@ -147,9 +174,10 @@
   .stage::before {
     content: ""; position: absolute; z-index: -1; inset: -25% -15%;
     background: radial-gradient(circle at center, var(--accent) 0%, transparent 70%);
-    opacity: .14; filter: blur(70px); pointer-events: none;
+    opacity: .16; filter: blur(70px); pointer-events: none;
     transition: opacity .4s ease, background .5s ease;
   }
+  html[data-theme="mono"] .stage::before { opacity: 0; }
 
   .board { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
 
@@ -163,13 +191,16 @@
     animation: pulse 1s ease-in-out infinite;
     transition: background .5s ease;
   }
+  html[data-theme="mono"] .colon span { box-shadow: none; animation: pulseMono 1s ease-in-out infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+  @keyframes pulseMono { 0%, 100% { opacity: .85; } 50% { opacity: .3; } }
 
   .flip-unit { position: relative; width: clamp(2.2rem, 8vw, 5.5rem); height: clamp(3.4rem, 12vw, 8.2rem); }
   .flip-card {
     position: absolute; inset: 0; border-radius: var(--radius);
     background: var(--card); box-shadow: var(--card-shadow); border: var(--border);
-    transition: background .5s ease, border-radius .5s ease, box-shadow .5s ease;
+    backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+    transition: background .5s ease, border-radius .5s ease, box-shadow .5s ease, border-color .5s ease;
   }
   .flip-card.flip { animation: flap .32s cubic-bezier(.4,0,.2,1); }
   @keyframes flap { 0% { transform: rotateX(0deg); } 45% { transform: rotateX(-12deg); } 100% { transform: rotateX(0deg); } }
@@ -216,25 +247,29 @@
       <div>
         <div class="panel-heading">Design</div>
         <div class="theme-grid" id="themeGrid">
-          <div class="swatch-row" data-theme="flap">
-            <span class="swatch" style="background:linear-gradient(135deg,#26262a,#c97a2b)"></span>
-            <span class="swatch-label">Flap</span>
+          <div class="swatch-row" data-theme="neon">
+            <span class="swatch" style="background:linear-gradient(135deg,#1a0a2e,#e838d1)"></span>
+            <span class="swatch-label">Neon Glow</span>
           </div>
-          <div class="swatch-row" data-theme="newsprint">
-            <span class="swatch" style="background:linear-gradient(135deg,#f7f2e4,#8a2a20)"></span>
-            <span class="swatch-label">Newsprint</span>
+          <div class="swatch-row" data-theme="glass">
+            <span class="swatch" style="background:linear-gradient(135deg,#0c1220,#9cc6ff)"></span>
+            <span class="swatch-label">Glassmorph</span>
           </div>
-          <div class="swatch-row" data-theme="terminal">
-            <span class="swatch" style="background:linear-gradient(135deg,#001400,#2ee65f)"></span>
-            <span class="swatch-label">Terminal</span>
+          <div class="swatch-row" data-theme="amber">
+            <span class="swatch" style="background:linear-gradient(135deg,#241207,#ff9a2e)"></span>
+            <span class="swatch-label">Retro Amber</span>
           </div>
-          <div class="swatch-row" data-theme="porcelain">
-            <span class="swatch" style="background:linear-gradient(135deg,#ffffff,#2454a6)"></span>
-            <span class="swatch-label">Porcelain</span>
+          <div class="swatch-row" data-theme="mono">
+            <span class="swatch" style="background:linear-gradient(135deg,#141414,#9a9a9a)"></span>
+            <span class="swatch-label">Minimal Mono</span>
           </div>
-          <div class="swatch-row" data-theme="dusk">
-            <span class="swatch" style="background:linear-gradient(135deg,#241238,#ef8b5b)"></span>
-            <span class="swatch-label">Dusk</span>
+          <div class="swatch-row" data-theme="ocean">
+            <span class="swatch" style="background:linear-gradient(135deg,#06202f,#4dd9ec)"></span>
+            <span class="swatch-label">Ocean Breeze</span>
+          </div>
+          <div class="swatch-row" data-theme="cyber">
+            <span class="swatch" style="background:linear-gradient(135deg,#030a05,#4fff8f)"></span>
+            <span class="swatch-label">Cyber Grid</span>
           </div>
         </div>
       </div>
@@ -267,7 +302,7 @@
 
 <script>
   const root = document.documentElement;
-  const state = { theme: 'flap', size: 'md' };
+  const state = { theme: 'neon', size: 'md' };
 
   function pad(n) { return n.toString().padStart(2, '0'); }
 
