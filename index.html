@@ -1,526 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="flap" data-size="md">
 <head>
 <meta charset="UTF-8">
 <title>Local Time</title>
-<script>
-  // Apply the saved theme/style/size/background to <html> before the body
-  // ever paints, so reloading never flashes the default look first.
-  (function () {
-    var VALID_THEMES = ['flap', 'daylight', 'midnight', 'ink', 'terminal', 'sunset'];
-    var VALID_SIZES = ['sm', 'md', 'lg', 'xl'];
-    var VALID_BGS = ['radial', 'linear', 'solid'];
-    var html = document.documentElement;
-    var saved = null;
-    try { saved = JSON.parse(localStorage.getItem('clockState')); } catch (e) {}
-    html.setAttribute('data-theme', (saved && VALID_THEMES.indexOf(saved.theme) !== -1) ? saved.theme : 'flap');
-    html.setAttribute('data-style', (saved && saved.style === 'classic') ? 'classic' : 'flip');
-    html.setAttribute('data-size', (saved && VALID_SIZES.indexOf(saved.size) !== -1) ? saved.size : 'md');
-    html.setAttribute('data-bg', (saved && VALID_BGS.indexOf(saved.bg) !== -1) ? saved.bg : 'radial');
-  })();
-</script>
 <style>
-  :root { --radius: 8px; --scale: 1; }
+  :root { --scale: 1; }
 
-  /* ---------- Themes (set on <html> so they apply before body paints) ---------- */
-  /* Flap — the original split-flap board: warm mechanical amber on charcoal */
+  /* ---------- Flap — split-flap departure board: bronze on charcoal ---------- */
   html[data-theme="flap"] {
-    --bg1:#1c1c1e; --bg2:#0c0c0e;
-    --card:#28282b; --card-top:#313134; --card-bottom:#1f1f22;
+    --bg1:#1c1c1e; --bg2:#0b0b0d;
+    --card:#26262a; --card-top:#303034; --card-bottom:#1d1d20;
     --card-line: rgba(0,0,0,.6);
-    --digit:#f5efe3; --accent:#e0973f; --accent-dim:#8a5a28;
+    --digit:#f2ece0; --accent:#c97a2b;
     --font-digit:'Arial Black', Arial, sans-serif;
     --font-label:'Courier New', monospace;
-    --radius: 8px; --glow: none;
+    --radius:6px; --card-shadow: 0 10px 22px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.03);
+    --glow:none; --border:none;
   }
-  /* Daylight — crisp, modern, high-key */
-  html[data-theme="daylight"] {
-    --bg1:#fbfbfc; --bg2:#e7ecf1;
-    --card:#ffffff; --card-top:#ffffff; --card-bottom:#eef2f5;
-    --card-line: rgba(0,0,0,.08);
-    --digit:#152029; --accent:#3457d5; --accent-dim:#b7c4f2;
-    --font-digit:'Helvetica Neue', Arial, sans-serif;
-    --font-label:'Helvetica Neue', Arial, sans-serif;
-    --radius: 14px; --glow: none;
-  }
-  /* Midnight — a calmer, more premium take on neon: indigo glass */
-  html[data-theme="midnight"] {
-    --bg1:#10123a; --bg2:#040513;
-    --card:#181c46; --card-top:#212658; --card-bottom:#12142f;
-    --card-line: rgba(0,0,0,.6);
-    --digit:#eef1ff; --accent:#7c9bff; --accent-dim:#33397f;
-    --font-digit:'Consolas', 'Courier New', monospace;
-    --font-label:'Consolas', 'Courier New', monospace;
-    --radius: 10px; --glow: 0 0 16px rgba(124,155,255,.5);
-  }
-  /* Ink — warm paper with an inked stamp accent */
-  html[data-theme="ink"] {
-    --bg1:#f4f0e4; --bg2:#e4dcc6;
-    --card:#faf6ea; --card-top:#fdfaf1; --card-bottom:#f0e9d8;
-    --card-line: rgba(0,0,0,.18);
-    --digit:#22242c; --accent:#a3242a; --accent-dim:#dcb0b0;
+
+  /* ---------- Newsprint — letterpress broadsheet: oxblood on cream paper ---------- */
+  html[data-theme="newsprint"] {
+    --bg1:#ece5d3; --bg2:#d8cfb4;
+    --card:#f7f2e4; --card-top:#fbf8ee; --card-bottom:#efe8d5;
+    --card-line: rgba(0,0,0,.16);
+    --digit:#211c14; --accent:#8a2a20;
     --font-digit:Georgia, 'Times New Roman', serif;
     --font-label:Georgia, serif;
-    --radius: 3px; --glow: none;
+    --radius:2px; --card-shadow: 0 3px 0 rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.06);
+    --glow:none; --border:none;
   }
-  /* Terminal — phosphor CRT green */
+
+  /* ---------- Terminal — CRT phosphor: green on black, scanlines ---------- */
   html[data-theme="terminal"] {
-    --bg1:#031403; --bg2:#000000;
-    --card:#001a00; --card-top:#012601; --card-bottom:#000f00;
-    --card-line: rgba(0,0,0,.8);
-    --digit:#33ff66; --accent:#33ff66; --accent-dim:#146b2a;
+    --bg1:#020a02; --bg2:#000000;
+    --card:#001400; --card-top:#012000; --card-bottom:#000c00;
+    --card-line: rgba(0,0,0,.85);
+    --digit:#2ee65f; --accent:#2ee65f;
     --font-digit:'Courier New', monospace;
     --font-label:'Courier New', monospace;
-    --radius: 0px; --glow: 0 0 8px currentColor;
+    --radius:0px; --card-shadow: 0 0 0 1px rgba(46,230,95,.08);
+    --glow: 0 0 9px currentColor; --border:none;
   }
-  /* Sunset — dusk gradient with a coral glow */
-  html[data-theme="sunset"] {
-    --bg1:#3b1750; --bg2:#150a2c;
-    --card:#2b1044; --card-top:#3b1a5c; --card-bottom:#1c0a30;
-    --card-line: rgba(0,0,0,.55);
-    --digit:#fff3ea; --accent:#ff8b5e; --accent-dim:#8a4530;
-    --font-digit:'Segoe UI', Arial, sans-serif;
-    --font-label:'Segoe UI', Arial, sans-serif;
-    --radius: 16px; --glow: 0 0 18px rgba(255,139,94,.5);
+
+  /* ---------- Porcelain — flat museum white: graphite ink, denim accent ---------- */
+  html[data-theme="porcelain"] {
+    --bg1:#fbfbfa; --bg2:#ebe9e3;
+    --card:#ffffff; --card-top:#ffffff; --card-bottom:#f2f0ea;
+    --card-line: rgba(0,0,0,.08);
+    --digit:#14181c; --accent:#2454a6;
+    --font-digit:'Helvetica Neue', Arial, sans-serif;
+    --font-label:'Helvetica Neue', Arial, sans-serif;
+    --radius:10px; --card-shadow: none;
+    --glow:none; --border:1px solid rgba(0,0,0,.09);
+  }
+
+  /* ---------- Dusk — plum-to-indigo gradient, coral glow ---------- */
+  html[data-theme="dusk"] {
+    --bg1:#2c1240; --bg2:#120821;
+    --card:#241238; --card-top:#331a4c; --card-bottom:#170a26;
+    --card-line: rgba(0,0,0,.5);
+    --digit:#fbe9dd; --accent:#ef8b5b;
+    --font-digit:'Trebuchet MS', 'Segoe UI', sans-serif;
+    --font-label:'Trebuchet MS', 'Segoe UI', sans-serif;
+    --radius:18px; --card-shadow: 0 12px 26px rgba(0,0,0,.45);
+    --glow: 0 0 16px rgba(239,139,91,.55); --border:none;
   }
 
   * { box-sizing: border-box; }
-
-  html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+  html, body { height: 100%; margin: 0; padding: 0; }
 
   body {
-    min-height: 100vh; min-width: 100vw;
+    min-height: 100vh;
     display: flex; align-items: center; justify-content: center;
     background: radial-gradient(ellipse at center, var(--bg1) 0%, var(--bg2) 75%);
     font-family: Arial, Helvetica, sans-serif;
     overflow: hidden;
-    transition: background 0.5s ease;
-  }
-  html[data-bg="solid"] body { background: var(--bg2); }
-  html[data-bg="linear"] body { background: linear-gradient(155deg, var(--bg1) 0%, var(--bg2) 100%); }
-
-  /* ---------- Clock scale (baseline; fine-tuned live by JS to avoid overflow) ---------- */
-  html[data-size="sm"] { --scale: 0.78; }
-  html[data-size="md"] { --scale: 1; }
-  html[data-size="lg"] { --scale: 1.22; }
-  html[data-size="xl"] { --scale: 1.46; }
-
-  /* ---------- Controls ----------
-     Chrome (buttons/panel) is intentionally theme-neutral: a dark glass
-     overlay that stays legible on top of every background, light or dark. */
-  .controls {
-    position: fixed; top: 1.2rem; right: 1.2rem; z-index: 50;
-    display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;
-    opacity: 1; transition: opacity 0.3s ease;
+    transition: background .5s ease;
   }
 
+  /* CRT scanlines, only for the terminal theme */
+  html[data-theme="terminal"] body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 40;
+    background: repeating-linear-gradient(
+      to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.15) 3px
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* ---------- Controls ---------- */
+  .controls { position: fixed; top: 1.2rem; right: 1.2rem; z-index: 50; }
   .icon-btn {
     width: 2.5rem; height: 2.5rem; border-radius: 50%;
     border: 1px solid rgba(255,255,255,0.16);
     background: rgba(18,18,22,0.55); color: #f2f2f2;
-    font-size: 1.15rem; display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
     cursor: pointer; backdrop-filter: blur(10px);
     box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    transition: transform 0.15s ease, background 0.2s ease;
+    transition: transform .15s ease, background .2s ease;
   }
-  .icon-btn:hover { transform: scale(1.08); background: rgba(28,28,34,0.75); }
-  .icon-btn:active { transform: scale(0.95); }
+  .icon-btn:hover { transform: scale(1.08); background: rgba(28,28,34,.75); }
+  .icon-btn:active { transform: scale(.95); }
 
   .panel {
-    display: none; flex-direction: column;
-    width: 15.5rem; max-height: 82vh; overflow-y: auto;
-    padding: 0.75rem 0.9rem 0.9rem;
+    display: none; flex-direction: column; gap: .9rem;
+    position: absolute; top: 3rem; right: 0;
+    width: 15.5rem; padding: .85rem .9rem .95rem;
     border-radius: 14px;
-    background: rgba(24,24,28,0.72);
+    background: rgba(24,24,28,0.86);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255,255,255,0.09);
     box-shadow: 0 16px 34px rgba(0,0,0,0.4);
   }
   .panel.open { display: flex; }
-  .panel::-webkit-scrollbar { width: 6px; }
-  .panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 
-  .panel-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-bottom: 0.55rem; margin-bottom: 0.55rem;
-    border-bottom: 1px solid rgba(255,255,255,0.09);
-  }
   .panel-heading {
-    font-family: 'Courier New', monospace; font-size: 0.72rem;
-    letter-spacing: 0.16em; text-transform: uppercase; font-weight: bold; color: #fff;
-  }
-  .panel-close {
-    background: none; border: none; color: rgba(255,255,255,0.5);
-    font-size: 1.05rem; line-height: 1; cursor: pointer;
-    padding: 0.1rem 0.4rem; border-radius: 6px; transition: color .15s ease, background .15s ease;
-  }
-  .panel-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
-
-  .panel-section { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.7rem 0; }
-  .panel-section:first-of-type { padding-top: 0; }
-  .panel-section:last-of-type { padding-bottom: 0; }
-  .panel-section + .panel-section { border-top: 1px solid rgba(255,255,255,0.07); }
-  .panel-title {
-    font-family: 'Courier New', monospace;
-    font-size: 0.66rem;
-    letter-spacing: 0.14em;
-    color: rgba(255,255,255,0.45);
-    text-transform: uppercase;
+    font-family: 'Courier New', monospace; font-size: .68rem;
+    letter-spacing: .1em; color: rgba(255,255,255,.45);
+    padding-bottom: .5rem; margin-bottom: .1rem; border-bottom: 1px solid rgba(255,255,255,.09);
   }
 
-  .theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.15rem; }
-
-  .swatch-row {
-    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
-    padding: 0.32rem 0.35rem; border-radius: 8px;
-  }
-  .swatch-row:hover { background: rgba(255,255,255,0.07); }
-  .swatch {
-    width: 1.15rem; height: 1.15rem; border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.25); flex-shrink: 0;
-  }
-  .swatch-label {
-    font-family: 'Courier New', monospace; font-size: 0.7rem;
-    letter-spacing: 0.03em; color: #ddd; text-transform: uppercase;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .swatch-row.active { background: rgba(255,255,255,0.06); }
+  .theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .15rem; }
+  .swatch-row { display: flex; align-items: center; gap: .5rem; cursor: pointer; padding: .32rem .35rem; border-radius: 8px; }
+  .swatch-row:hover { background: rgba(255,255,255,.07); }
+  .swatch { width: 1.15rem; height: 1.15rem; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); flex-shrink: 0; }
+  .swatch-label { font-family: 'Courier New', monospace; font-size: .68rem; color: #ddd; }
+  .swatch-row.active { background: rgba(255,255,255,.06); }
   .swatch-row.active .swatch-label { color: #fff; font-weight: bold; }
-  .swatch-row.active .swatch { box-shadow: 0 0 0 2px rgba(255,255,255,0.85); }
+  .swatch-row.active .swatch { box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
 
-  /* ---------- Searchable timezone picker ---------- */
-  .tz-picker { position: relative; }
-  .tz-input {
-    width: 100%; padding: 0.48rem 0.6rem; border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04);
-    color: #eee; font-family: 'Courier New', monospace; font-size: 0.72rem;
-    letter-spacing: 0.02em; outline: none; transition: border-color 0.15s ease;
-  }
-  .tz-input::placeholder { color: rgba(255,255,255,0.35); }
-  .tz-input:focus { border-color: rgba(255,255,255,0.4); }
-  .tz-results {
-    position: absolute; left: 0; right: 0; top: calc(100% + 4px);
-    max-height: 11rem; overflow-y: auto;
-    background: rgba(18,18,22,0.98); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,0.4);
-    display: none; z-index: 5;
-  }
-  .tz-results.open { display: block; }
-  .tz-result {
-    padding: 0.4rem 0.6rem; font-family: 'Courier New', monospace; font-size: 0.68rem;
-    color: #ddd; cursor: pointer; display: flex; justify-content: space-between; gap: 0.5rem;
-  }
-  .tz-result:hover { background: rgba(255,255,255,0.08); }
-  .tz-offset { color: rgba(255,255,255,0.4); flex-shrink: 0; }
-  .tz-current {
-    font-family: 'Courier New', monospace; font-size: 0.62rem;
-    color: rgba(255,255,255,0.4); letter-spacing: 0.03em;
-  }
-
-  .segmented {
-    display: flex; border-radius: 8px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-  }
+  .segmented { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.15); }
   .segmented button {
-    flex: 1; padding: 0.42rem 0.3rem; border: none; cursor: pointer;
-    background: rgba(255,255,255,0.04); color: #ccc;
-    font-family: 'Courier New', monospace; font-size: 0.68rem;
-    letter-spacing: 0.04em; text-transform: uppercase;
-    transition: background 0.15s ease, color 0.15s ease;
+    flex: 1; padding: .4rem .3rem; border: none; cursor: pointer;
+    background: rgba(255,255,255,.04); color: #ccc;
+    font-family: 'Courier New', monospace; font-size: .66rem; letter-spacing: .04em;
+    transition: background .15s ease, color .15s ease;
   }
-  .segmented button.active { background: var(--accent); color: #0b0b0c; font-weight: bold; }
-  .segmented button:hover:not(.active) { background: rgba(255,255,255,0.1); }
+  .segmented button.active { background: #e0973f; color: #0b0b0c; font-weight: bold; }
+  .segmented button:hover:not(.active) { background: rgba(255,255,255,.1); }
+  .panel-sub { font-family: 'Courier New', monospace; font-size: .62rem; letter-spacing: .1em; color: rgba(255,255,255,.4); }
 
-  .switch-row {
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .switch-row .swatch-label { color: #ddd; }
-  .switch { position: relative; width: 2.4rem; height: 1.3rem; flex-shrink: 0; }
-  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
-  .slider {
-    position: absolute; inset: 0; background: rgba(255,255,255,0.15);
-    border-radius: 999px; transition: background 0.2s ease; pointer-events: none;
-  }
-  .slider::before {
-    content: ""; position: absolute; height: 1rem; width: 1rem;
-    left: 0.15rem; top: 0.15rem; background: #fff; border-radius: 50%;
-    transition: transform 0.2s ease;
-  }
-  .switch input:checked + .slider { background: var(--accent); }
-  .switch input:checked + .slider::before { transform: translateX(1.1rem); }
-
-  .reset-all {
-    background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6);
-    font-family: 'Courier New', monospace; font-size: 0.65rem; letter-spacing: 0.1em;
-    text-transform: uppercase; padding: 0.55rem; border-radius: 8px; cursor: pointer; width: 100%;
-    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-  }
-  .reset-all:hover { color: #fff; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.06); }
-
-  /* ---------- Stage / ambient glow ---------- */
+  /* ---------- Stage ---------- */
   .stage {
     position: relative; display: flex; align-items: center; justify-content: center;
-    transform: scale(var(--scale)); transition: transform 0.35s ease;
+    transform: scale(var(--scale)); transition: transform .35s ease;
   }
   .stage::before {
     content: ""; position: absolute; z-index: -1; inset: -25% -15%;
     background: radial-gradient(circle at center, var(--accent) 0%, transparent 70%);
-    opacity: 0.14; filter: blur(70px); pointer-events: none;
-    transition: opacity 0.4s ease, background 0.5s ease;
-  }
-  body.no-ambient .stage::before { opacity: 0; }
-
-  /* ---------- Flip board ---------- */
-  .board { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
-
-  .eyebrow {
-    font-family: var(--font-label); color: var(--accent);
-    letter-spacing: 0.5em; font-size: clamp(0.7rem, 1.4vw, 0.95rem);
-    text-transform: uppercase; padding-left: 0.5em; text-shadow: var(--glow);
-    transition: color 0.5s ease;
+    opacity: .14; filter: blur(70px); pointer-events: none;
+    transition: opacity .4s ease, background .5s ease;
   }
 
-  .clock-row { display: flex; align-items: center; gap: clamp(0.4rem, 1.2vw, 0.9rem); }
+  .board { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
 
-  .colon {
-    display: flex; flex-direction: column; gap: clamp(0.6rem, 1.6vw, 1.1rem);
-    padding: 0 clamp(0.1rem, 0.4vw, 0.3rem);
-  }
+  .clock-row { display: flex; align-items: center; gap: clamp(.4rem, 1.2vw, .9rem); }
+
+  .colon { display: flex; flex-direction: column; gap: clamp(.6rem, 1.6vw, 1.1rem); padding: 0 clamp(.1rem, .4vw, .3rem); }
   .colon span {
-    width: clamp(6px, 0.9vw, 10px); height: clamp(6px, 0.9vw, 10px);
+    width: clamp(6px, .9vw, 10px); height: clamp(6px, .9vw, 10px);
     border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 10px var(--accent); animation: pulse 1s ease-in-out infinite;
-    transition: background 0.5s ease, box-shadow 0.5s ease;
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 1s ease-in-out infinite;
+    transition: background .5s ease;
   }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
 
-  .flip-unit {
-    position: relative; width: clamp(2.2rem, 8vw, 5.5rem);
-    height: clamp(3.4rem, 12vw, 8.2rem); perspective: 400px;
-  }
+  .flip-unit { position: relative; width: clamp(2.2rem, 8vw, 5.5rem); height: clamp(3.4rem, 12vw, 8.2rem); }
   .flip-card {
     position: absolute; inset: 0; border-radius: var(--radius);
-    background: var(--card);
-    box-shadow: 0 10px 22px rgba(0,0,0,0.4), 0 2px 0 rgba(255,255,255,0.04) inset, inset 0 0 0 1px rgba(255,255,255,0.03);
-    transform-style: preserve-3d; transform-origin: center;
-    transition: background 0.5s ease, border-radius 0.5s ease;
+    background: var(--card); box-shadow: var(--card-shadow); border: var(--border);
+    transition: background .5s ease, border-radius .5s ease, box-shadow .5s ease;
   }
-  .flip-card.flip { animation: flap 0.32s cubic-bezier(.4,0,.2,1); }
+  .flip-card.flip { animation: flap .32s cubic-bezier(.4,0,.2,1); }
   @keyframes flap { 0% { transform: rotateX(0deg); } 45% { transform: rotateX(-12deg); } 100% { transform: rotateX(0deg); } }
 
   .half { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; display: flex; justify-content: center; }
   .half.top {
     top: 0; align-items: flex-start; border-radius: var(--radius) var(--radius) 0 0;
     background: linear-gradient(to bottom, var(--card-top), var(--card) 90%);
-    transition: background 0.5s ease, border-radius 0.5s ease;
+    transition: background .5s ease, border-radius .5s ease;
   }
   .half.bottom {
     bottom: 0; align-items: flex-end; border-radius: 0 0 var(--radius) var(--radius);
     background: linear-gradient(to top, var(--card-bottom), var(--card) 90%);
-    transition: background 0.5s ease, border-radius 0.5s ease;
+    transition: background .5s ease, border-radius .5s ease;
   }
-  .half::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: var(--card-line); transition: background 0.5s ease; }
+  .half::after { content:""; position:absolute; left:0; right:0; height:2px; background: var(--card-line); transition: background .5s ease; }
   .half.top::after { bottom: 0; }
   .half.bottom::after { top: 0; }
 
   .half span {
     display: block; font-weight: 900; font-size: clamp(2.4rem, 9.5vw, 6.2rem);
     line-height: clamp(3.4rem, 12vw, 8.2rem); color: var(--digit);
-    font-family: var(--font-digit); letter-spacing: -0.02em; user-select: none;
-    text-shadow: var(--glow);
-    transition: color 0.5s ease;
+    font-family: var(--font-digit); letter-spacing: -.02em; user-select: none;
+    text-shadow: var(--glow); transition: color .5s ease;
   }
   .half.bottom span { margin-top: calc(-1 * clamp(3.4rem, 12vw, 8.2rem)); }
 
-  .ampm-badge {
+  #date {
     font-family: var(--font-label); color: var(--accent);
-    letter-spacing: 0.15em; font-size: clamp(0.9rem, 2vw, 1.2rem);
-    align-self: flex-end; margin-left: 0.3rem; text-shadow: var(--glow);
-    transition: color 0.5s ease;
+    letter-spacing: .12em; font-size: clamp(.85rem, 1.8vw, 1.15rem);
+    transition: color .5s ease;
   }
 
-  #date, #classicDate {
-    font-family: var(--font-label); color: var(--accent);
-    letter-spacing: 0.35em; text-transform: uppercase;
-    font-size: clamp(1rem, 2.2vw, 1.5rem); padding-left: 0.35em;
-    transition: opacity 0.2s ease, color 0.5s ease;
-  }
-
-  /* ---------- Classic style ---------- */
-  .classic-clock { display: none; flex-direction: column; align-items: center; gap: 1rem; }
-  #classicTime {
-    font-size: clamp(3rem, 12vw, 10rem); font-weight: 700; color: var(--digit);
-    letter-spacing: 0.05em; font-variant-numeric: tabular-nums;
-    font-family: var(--font-digit); user-select: none; white-space: nowrap;
-    transition: color 0.5s ease;
-  }
-  #classicDigits { text-shadow: var(--glow); }
-  .classic-ampm {
-    font-size: 0.26em; letter-spacing: 0.12em; margin-left: 0.35em;
-    color: var(--accent); font-family: var(--font-label); text-shadow: none;
-    vertical-align: middle; transition: color 0.5s ease;
-  }
-
-  html[data-style="classic"] .board { display: none; }
-  html[data-style="classic"] .classic-clock { display: flex; }
+  html[data-size="sm"] { --scale: .78; }
+  html[data-size="md"] { --scale: 1; }
+  html[data-size="lg"] { --scale: 1.22; }
 </style>
 </head>
 <body>
 
   <div class="controls">
-    <button class="icon-btn" id="settingsBtn" title="Settings (or press S)">⚙</button>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
     <div class="panel" id="settingsPanel">
-
-      <div class="panel-header">
-        <span class="panel-heading">Settings</span>
-        <button class="panel-close" id="panelCloseBtn" aria-label="Close settings">✕</button>
-      </div>
-
-      <div class="panel-section">
-        <div class="panel-title">Color Theme</div>
-        <div class="theme-grid">
+      <div>
+        <div class="panel-heading">Design</div>
+        <div class="theme-grid" id="themeGrid">
           <div class="swatch-row" data-theme="flap">
-            <span class="swatch" style="background:linear-gradient(135deg,#28282b,#e0973f)"></span>
+            <span class="swatch" style="background:linear-gradient(135deg,#26262a,#c97a2b)"></span>
             <span class="swatch-label">Flap</span>
           </div>
-          <div class="swatch-row" data-theme="daylight">
-            <span class="swatch" style="background:linear-gradient(135deg,#ffffff,#3457d5)"></span>
-            <span class="swatch-label">Daylight</span>
-          </div>
-          <div class="swatch-row" data-theme="midnight">
-            <span class="swatch" style="background:linear-gradient(135deg,#181c46,#7c9bff)"></span>
-            <span class="swatch-label">Midnight</span>
-          </div>
-          <div class="swatch-row" data-theme="ink">
-            <span class="swatch" style="background:linear-gradient(135deg,#f4f0e4,#a3242a)"></span>
-            <span class="swatch-label">Ink</span>
+          <div class="swatch-row" data-theme="newsprint">
+            <span class="swatch" style="background:linear-gradient(135deg,#f7f2e4,#8a2a20)"></span>
+            <span class="swatch-label">Newsprint</span>
           </div>
           <div class="swatch-row" data-theme="terminal">
-            <span class="swatch" style="background:linear-gradient(135deg,#001a00,#33ff66)"></span>
+            <span class="swatch" style="background:linear-gradient(135deg,#001400,#2ee65f)"></span>
             <span class="swatch-label">Terminal</span>
           </div>
-          <div class="swatch-row" data-theme="sunset">
-            <span class="swatch" style="background:linear-gradient(135deg,#2b1044,#ff8b5e)"></span>
-            <span class="swatch-label">Sunset</span>
+          <div class="swatch-row" data-theme="porcelain">
+            <span class="swatch" style="background:linear-gradient(135deg,#ffffff,#2454a6)"></span>
+            <span class="swatch-label">Porcelain</span>
+          </div>
+          <div class="swatch-row" data-theme="dusk">
+            <span class="swatch" style="background:linear-gradient(135deg,#241238,#ef8b5b)"></span>
+            <span class="swatch-label">Dusk</span>
           </div>
         </div>
       </div>
-
-      <div class="panel-section">
-        <div class="panel-title">Timezone</div>
-        <div class="tz-picker">
-          <input type="text" id="tzSearch" class="tz-input" placeholder="Search city or timezone…" autocomplete="off" spellcheck="false">
-          <div class="tz-results" id="tzResults"></div>
-        </div>
-        <div class="tz-current" id="tzCurrent">Showing local time</div>
-      </div>
-
-      <div class="panel-section">
-        <div class="panel-title">Clock Style</div>
-        <div class="segmented" id="styleSeg">
-          <button data-style="flip" class="active">Flip Board</button>
-          <button data-style="classic">Classic</button>
-        </div>
-      </div>
-
-      <div class="panel-section">
-        <div class="panel-title">Clock Size</div>
+      <div>
+        <div class="panel-sub" style="margin-bottom:.35rem;">Size</div>
         <div class="segmented" id="sizeSeg">
           <button data-size="sm">S</button>
           <button data-size="md" class="active">M</button>
           <button data-size="lg">L</button>
-          <button data-size="xl">XL</button>
         </div>
       </div>
-
-      <div class="panel-section">
-        <div class="panel-title">Background</div>
-        <div class="segmented" id="bgSeg">
-          <button data-bg="radial" class="active">Glow</button>
-          <button data-bg="linear">Fade</button>
-          <button data-bg="solid">Flat</button>
-        </div>
-      </div>
-
-      <div class="panel-section">
-        <div class="panel-title">Time Format</div>
-        <div class="segmented" id="formatSeg">
-          <button data-format="24" class="active">24h</button>
-          <button data-format="12">12h AM/PM</button>
-        </div>
-        <div class="switch-row" style="margin-top:0.35rem;">
-          <span class="swatch-label">Show Seconds</span>
-          <label class="switch">
-            <input type="checkbox" id="secondsToggle" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div class="panel-section">
-        <div class="switch-row">
-          <span class="swatch-label">Show Date</span>
-          <label class="switch">
-            <input type="checkbox" id="dateToggle" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="segmented" id="dateFormatSeg" style="margin-top:0.35rem;">
-          <button data-datefmt="long" class="active">Full</button>
-          <button data-datefmt="short">Short</button>
-        </div>
-      </div>
-
-      <div class="panel-section">
-        <div class="switch-row">
-          <span class="swatch-label">Ambient Glow</span>
-          <label class="switch">
-            <input type="checkbox" id="glowToggle" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div class="panel-section">
-        <button class="reset-all" id="resetAllBtn">Reset all settings</button>
-      </div>
-
     </div>
-    <button class="icon-btn" id="fullscreenBtn" title="Fullscreen (or press F)">⛶</button>
   </div>
 
   <div class="stage">
     <div class="board">
-      <div class="eyebrow">Local Time</div>
-      <div class="clock-row" id="clock-row">
+      <div class="clock-row">
         <div class="flip-unit" id="h0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
         <div class="flip-unit" id="h1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
         <div class="colon"><span></span><span></span></div>
         <div class="flip-unit" id="m0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
         <div class="flip-unit" id="m1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-        <div class="colon" id="secColon"><span></span><span></span></div>
+        <div class="colon"><span></span><span></span></div>
         <div class="flip-unit" id="s0"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
         <div class="flip-unit" id="s1"><div class="flip-card"><div class="half top"><span>0</span></div><div class="half bottom"><span>0</span></div></div></div>
-        <div class="ampm-badge" id="ampmBadge" style="display:none"></div>
       </div>
       <div id="date"></div>
-    </div>
-
-    <div class="classic-clock">
-      <div id="classicTime"><span id="classicDigits">00:00:00</span><span class="classic-ampm" id="classicAmpm"></span></div>
-      <div id="classicDate"></div>
     </div>
   </div>
 
 <script>
-  const VALID_THEMES = ['flap', 'daylight', 'midnight', 'ink', 'terminal', 'sunset'];
-  const SIZE_SCALE = { sm: 0.78, md: 1, lg: 1.22, xl: 1.46 };
-  const defaultState = {
-    theme: 'flap', style: 'flip', format: '24', seconds: true,
-    showDate: true, dateFormat: 'long', size: 'md', bg: 'radial',
-    glow: true, timezone: ''
-  };
-  const state = { ...defaultState };
+  const root = document.documentElement;
+  const state = { theme: 'flap', size: 'md' };
 
   function pad(n) { return n.toString().padStart(2, '0'); }
 
@@ -537,1782 +284,43 @@
 
   function updateClock() {
     const now = new Date();
-    const tz = state.timezone || undefined;
-
-    const timeParts = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit'
-    }).formatToParts(now).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
-
-    let h24 = parseInt(timeParts.hour, 10);
-    const mm = timeParts.minute;
-    const ss = timeParts.second;
-    const ampm = h24 >= 12 ? 'PM' : 'AM';
-
-    let hh;
-    if (state.format === '12') {
-      let h12 = h24 % 12;
-      if (h12 === 0) h12 = 12;
-      hh = pad(h12);
-    } else {
-      hh = pad(h24);
-    }
-
+    const hh = pad(now.getHours());
+    const mm = pad(now.getMinutes());
+    const ss = pad(now.getSeconds());
     setDigit('h0', hh[0]); setDigit('h1', hh[1]);
     setDigit('m0', mm[0]); setDigit('m1', mm[1]);
     setDigit('s0', ss[0]); setDigit('s1', ss[1]);
-
-    const dateOptions = state.dateFormat === 'short'
-      ? { timeZone: tz, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
-      : { timeZone: tz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateStr = new Intl.DateTimeFormat(undefined, dateOptions).format(now);
-    document.getElementById('date').textContent = dateStr;
-    document.getElementById('classicDate').textContent = dateStr;
-
-    const ampmBadge = document.getElementById('ampmBadge');
-    if (state.format === '12') {
-      ampmBadge.style.display = '';
-      ampmBadge.textContent = ampm;
-    } else {
-      ampmBadge.style.display = 'none';
-    }
-
-    let classicStr = `${hh}:${mm}`;
-    if (state.seconds) classicStr += `:${ss}`;
-    document.getElementById('classicDigits').textContent = classicStr;
-    document.getElementById('classicAmpm').textContent = state.format === '12' ? ampm : '';
+    document.getElementById('date').textContent = new Intl.DateTimeFormat(undefined, {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    }).format(now);
   }
   updateClock();
   setInterval(updateClock, 1000);
 
-  // ----- Settings persistence -----
-
-const TIMEZONE_DATA = [
-  {
-    "value": "Dateline Standard Time",
-    "abbr": "DST",
-    "offset": -12,
-    "isdst": false,
-    "text": "(UTC-12:00) International Date Line West",
-    "utc": [
-      "Etc/GMT+12"
-    ]
-  },
-  {
-    "value": "UTC-11",
-    "abbr": "U",
-    "offset": -11,
-    "isdst": false,
-    "text": "(UTC-11:00) Coordinated Universal Time-11",
-    "utc": [
-      "Etc/GMT+11",
-      "Pacific/Midway",
-      "Pacific/Niue",
-      "Pacific/Pago_Pago"
-    ]
-  },
-  {
-    "value": "Hawaiian Standard Time",
-    "abbr": "HST",
-    "offset": -10,
-    "isdst": false,
-    "text": "(UTC-10:00) Hawaii",
-    "utc": [
-      "Etc/GMT+10",
-      "Pacific/Honolulu",
-      "Pacific/Johnston",
-      "Pacific/Rarotonga",
-      "Pacific/Tahiti"
-    ]
-  },
-  {
-    "value": "Alaskan Standard Time",
-    "abbr": "AKDT",
-    "offset": -8,
-    "isdst": true,
-    "text": "(UTC-09:00) Alaska",
-    "utc": [
-      "America/Anchorage",
-      "America/Juneau",
-      "America/Nome",
-      "America/Sitka",
-      "America/Yakutat"
-    ]
-  },
-  {
-    "value": "Pacific Standard Time (Mexico)",
-    "abbr": "PDT",
-    "offset": -7,
-    "isdst": true,
-    "text": "(UTC-08:00) Baja California",
-    "utc": [
-      "America/Santa_Isabel"
-    ]
-  },
-  {
-    "value": "Pacific Daylight Time",
-    "abbr": "PDT",
-    "offset": -7,
-    "isdst": true,
-    "text": "(UTC-07:00) Pacific Daylight Time (US & Canada)",
-    "utc": [
-      "America/Los_Angeles",
-      "America/Tijuana",
-      "America/Vancouver"
-    ]
-  },
-  {
-    "value": "Pacific Standard Time",
-    "abbr": "PST",
-    "offset": -8,
-    "isdst": false,
-    "text": "(UTC-08:00) Pacific Standard Time (US & Canada)",
-    "utc": [
-      "America/Los_Angeles",
-      "America/Tijuana",
-      "America/Vancouver",
-      "PST8PDT"
-    ]
-  },
-  {
-    "value": "US Mountain Standard Time",
-    "abbr": "UMST",
-    "offset": -7,
-    "isdst": false,
-    "text": "(UTC-07:00) Arizona",
-    "utc": [
-      "America/Creston",
-      "America/Dawson",
-      "America/Dawson_Creek",
-      "America/Hermosillo",
-      "America/Phoenix",
-      "America/Whitehorse",
-      "Etc/GMT+7"
-    ]
-  },
-  {
-    "value": "Mountain Standard Time (Mexico)",
-    "abbr": "MDT",
-    "offset": -6,
-    "isdst": true,
-    "text": "(UTC-07:00) Chihuahua, La Paz, Mazatlan",
-    "utc": [
-      "America/Chihuahua",
-      "America/Mazatlan"
-    ]
-  },
-  {
-    "value": "Mountain Standard Time",
-    "abbr": "MDT",
-    "offset": -6,
-    "isdst": true,
-    "text": "(UTC-07:00) Mountain Time (US & Canada)",
-    "utc": [
-      "America/Boise",
-      "America/Cambridge_Bay",
-      "America/Denver",
-      "America/Edmonton",
-      "America/Inuvik",
-      "America/Ojinaga",
-      "America/Yellowknife",
-      "MST7MDT"
-    ]
-  },
-  {
-    "value": "Central America Standard Time",
-    "abbr": "CAST",
-    "offset": -6,
-    "isdst": false,
-    "text": "(UTC-06:00) Central America",
-    "utc": [
-      "America/Belize",
-      "America/Costa_Rica",
-      "America/El_Salvador",
-      "America/Guatemala",
-      "America/Managua",
-      "America/Tegucigalpa",
-      "Etc/GMT+6",
-      "Pacific/Galapagos"
-    ]
-  },
-  {
-    "value": "Central Standard Time",
-    "abbr": "CDT",
-    "offset": -5,
-    "isdst": true,
-    "text": "(UTC-06:00) Central Time (US & Canada)",
-    "utc": [
-      "America/Chicago",
-      "America/Indiana/Knox",
-      "America/Indiana/Tell_City",
-      "America/Matamoros",
-      "America/Menominee",
-      "America/North_Dakota/Beulah",
-      "America/North_Dakota/Center",
-      "America/North_Dakota/New_Salem",
-      "America/Rainy_River",
-      "America/Rankin_Inlet",
-      "America/Resolute",
-      "America/Winnipeg",
-      "CST6CDT"
-    ]
-  },
-  {
-    "value": "Central Standard Time (Mexico)",
-    "abbr": "CDT",
-    "offset": -5,
-    "isdst": true,
-    "text": "(UTC-06:00) Guadalajara, Mexico City, Monterrey",
-    "utc": [
-      "America/Bahia_Banderas",
-      "America/Cancun",
-      "America/Merida",
-      "America/Mexico_City",
-      "America/Monterrey"
-    ]
-  },
-  {
-    "value": "Canada Central Standard Time",
-    "abbr": "CCST",
-    "offset": -6,
-    "isdst": false,
-    "text": "(UTC-06:00) Saskatchewan",
-    "utc": [
-      "America/Regina",
-      "America/Swift_Current"
-    ]
-  },
-  {
-    "value": "SA Pacific Standard Time",
-    "abbr": "SPST",
-    "offset": -5,
-    "isdst": false,
-    "text": "(UTC-05:00) Bogota, Lima, Quito",
-    "utc": [
-      "America/Bogota",
-      "America/Cayman",
-      "America/Coral_Harbour",
-      "America/Eirunepe",
-      "America/Guayaquil",
-      "America/Jamaica",
-      "America/Lima",
-      "America/Panama",
-      "America/Rio_Branco",
-      "Etc/GMT+5"
-    ]
-  },
-  {
-    "value": "Eastern Standard Time",
-    "abbr": "EST",
-    "offset": -5,
-    "isdst": false,
-    "text": "(UTC-05:00) Eastern Time (US & Canada)",
-    "utc": [
-      "America/Detroit",
-      "America/Havana",
-      "America/Indiana/Petersburg",
-      "America/Indiana/Vincennes",
-      "America/Indiana/Winamac",
-      "America/Iqaluit",
-      "America/Kentucky/Monticello",
-      "America/Louisville",
-      "America/Montreal",
-      "America/Nassau",
-      "America/New_York",
-      "America/Nipigon",
-      "America/Pangnirtung",
-      "America/Port-au-Prince",
-      "America/Thunder_Bay",
-      "America/Toronto"
-    ]
-  },
-  {
-    "value": "Eastern Daylight Time",
-    "abbr": "EDT",
-    "offset": -4,
-    "isdst": true,
-    "text": "(UTC-04:00) Eastern Daylight Time (US & Canada)",
-    "utc": [
-      "America/Detroit",
-      "America/Havana",
-      "America/Indiana/Petersburg",
-      "America/Indiana/Vincennes",
-      "America/Indiana/Winamac",
-      "America/Iqaluit",
-      "America/Kentucky/Monticello",
-      "America/Louisville",
-      "America/Montreal",
-      "America/Nassau",
-      "America/New_York",
-      "America/Nipigon",
-      "America/Pangnirtung",
-      "America/Port-au-Prince",
-      "America/Thunder_Bay",
-      "America/Toronto"
-    ]
-  },
-  {
-    "value": "US Eastern Standard Time",
-    "abbr": "UEDT",
-    "offset": -5,
-    "isdst": false,
-    "text": "(UTC-05:00) Indiana (East)",
-    "utc": [
-      "America/Indiana/Marengo",
-      "America/Indiana/Vevay",
-      "America/Indianapolis"
-    ]
-  },
-  {
-    "value": "Venezuela Standard Time",
-    "abbr": "VST",
-    "offset": -4.5,
-    "isdst": false,
-    "text": "(UTC-04:30) Caracas",
-    "utc": [
-      "America/Caracas"
-    ]
-  },
-  {
-    "value": "Paraguay Standard Time",
-    "abbr": "PYT",
-    "offset": -4,
-    "isdst": false,
-    "text": "(UTC-04:00) Asuncion",
-    "utc": [
-      "America/Asuncion"
-    ]
-  },
-  {
-    "value": "Atlantic Standard Time",
-    "abbr": "ADT",
-    "offset": -3,
-    "isdst": true,
-    "text": "(UTC-04:00) Atlantic Time (Canada)",
-    "utc": [
-      "America/Glace_Bay",
-      "America/Goose_Bay",
-      "America/Halifax",
-      "America/Moncton",
-      "America/Thule",
-      "Atlantic/Bermuda"
-    ]
-  },
-  {
-    "value": "Central Brazilian Standard Time",
-    "abbr": "CBST",
-    "offset": -4,
-    "isdst": false,
-    "text": "(UTC-04:00) Cuiaba",
-    "utc": [
-      "America/Campo_Grande",
-      "America/Cuiaba"
-    ]
-  },
-  {
-    "value": "SA Western Standard Time",
-    "abbr": "SWST",
-    "offset": -4,
-    "isdst": false,
-    "text": "(UTC-04:00) Georgetown, La Paz, Manaus, San Juan",
-    "utc": [
-      "America/Anguilla",
-      "America/Antigua",
-      "America/Aruba",
-      "America/Barbados",
-      "America/Blanc-Sablon",
-      "America/Boa_Vista",
-      "America/Curacao",
-      "America/Dominica",
-      "America/Grand_Turk",
-      "America/Grenada",
-      "America/Guadeloupe",
-      "America/Guyana",
-      "America/Kralendijk",
-      "America/La_Paz",
-      "America/Lower_Princes",
-      "America/Manaus",
-      "America/Marigot",
-      "America/Martinique",
-      "America/Montserrat",
-      "America/Port_of_Spain",
-      "America/Porto_Velho",
-      "America/Puerto_Rico",
-      "America/Santo_Domingo",
-      "America/St_Barthelemy",
-      "America/St_Kitts",
-      "America/St_Lucia",
-      "America/St_Thomas",
-      "America/St_Vincent",
-      "America/Tortola",
-      "Etc/GMT+4"
-    ]
-  },
-  {
-    "value": "Pacific SA Standard Time",
-    "abbr": "PSST",
-    "offset": -4,
-    "isdst": false,
-    "text": "(UTC-04:00) Santiago",
-    "utc": [
-      "America/Santiago",
-      "Antarctica/Palmer"
-    ]
-  },
-  {
-    "value": "Newfoundland Standard Time",
-    "abbr": "NDT",
-    "offset": -2.5,
-    "isdst": true,
-    "text": "(UTC-03:30) Newfoundland",
-    "utc": [
-      "America/St_Johns"
-    ]
-  },
-  {
-    "value": "E. South America Standard Time",
-    "abbr": "ESAST",
-    "offset": -3,
-    "isdst": false,
-    "text": "(UTC-03:00) Brasilia",
-    "utc": [
-      "America/Sao_Paulo"
-    ]
-  },
-  {
-    "value": "Argentina Standard Time",
-    "abbr": "AST",
-    "offset": -3,
-    "isdst": false,
-    "text": "(UTC-03:00) Buenos Aires",
-    "utc": [
-      "America/Argentina/Buenos_Aires",
-      "America/Argentina/Catamarca",
-      "America/Argentina/Cordoba",
-      "America/Argentina/Jujuy",
-      "America/Argentina/La_Rioja",
-      "America/Argentina/Mendoza",
-      "America/Argentina/Rio_Gallegos",
-      "America/Argentina/Salta",
-      "America/Argentina/San_Juan",
-      "America/Argentina/San_Luis",
-      "America/Argentina/Tucuman",
-      "America/Argentina/Ushuaia",
-      "America/Buenos_Aires",
-      "America/Catamarca",
-      "America/Cordoba",
-      "America/Jujuy",
-      "America/Mendoza"
-    ]
-  },
-  {
-    "value": "SA Eastern Standard Time",
-    "abbr": "SEST",
-    "offset": -3,
-    "isdst": false,
-    "text": "(UTC-03:00) Cayenne, Fortaleza",
-    "utc": [
-      "America/Araguaina",
-      "America/Belem",
-      "America/Cayenne",
-      "America/Fortaleza",
-      "America/Maceio",
-      "America/Paramaribo",
-      "America/Recife",
-      "America/Santarem",
-      "Antarctica/Rothera",
-      "Atlantic/Stanley",
-      "Etc/GMT+3"
-    ]
-  },
-  {
-    "value": "Greenland Standard Time",
-    "abbr": "GDT",
-    "offset": -3,
-    "isdst": true,
-    "text": "(UTC-03:00) Greenland",
-    "utc": [
-      "America/Godthab"
-    ]
-  },
-  {
-    "value": "Montevideo Standard Time",
-    "abbr": "MST",
-    "offset": -3,
-    "isdst": false,
-    "text": "(UTC-03:00) Montevideo",
-    "utc": [
-      "America/Montevideo"
-    ]
-  },
-  {
-    "value": "Bahia Standard Time",
-    "abbr": "BST",
-    "offset": -3,
-    "isdst": false,
-    "text": "(UTC-03:00) Salvador",
-    "utc": [
-      "America/Bahia"
-    ]
-  },
-  {
-    "value": "UTC-02",
-    "abbr": "U",
-    "offset": -2,
-    "isdst": false,
-    "text": "(UTC-02:00) Coordinated Universal Time-02",
-    "utc": [
-      "America/Noronha",
-      "Atlantic/South_Georgia",
-      "Etc/GMT+2"
-    ]
-  },
-  {
-    "value": "Mid-Atlantic Standard Time",
-    "abbr": "MDT",
-    "offset": -1,
-    "isdst": true,
-    "text": "(UTC-02:00) Mid-Atlantic - Old",
-    "utc": []
-  },
-  {
-    "value": "Azores Standard Time",
-    "abbr": "ADT",
-    "offset": 0,
-    "isdst": true,
-    "text": "(UTC-01:00) Azores",
-    "utc": [
-      "America/Scoresbysund",
-      "Atlantic/Azores"
-    ]
-  },
-  {
-    "value": "Cape Verde Standard Time",
-    "abbr": "CVST",
-    "offset": -1,
-    "isdst": false,
-    "text": "(UTC-01:00) Cape Verde Is.",
-    "utc": [
-      "Atlantic/Cape_Verde",
-      "Etc/GMT+1"
-    ]
-  },
-  {
-    "value": "Morocco Standard Time",
-    "abbr": "MDT",
-    "offset": 1,
-    "isdst": true,
-    "text": "(UTC) Casablanca",
-    "utc": [
-      "Africa/Casablanca",
-      "Africa/El_Aaiun"
-    ]
-  },
-  {
-    "value": "UTC",
-    "abbr": "UTC",
-    "offset": 0,
-    "isdst": false,
-    "text": "(UTC) Coordinated Universal Time",
-    "utc": [
-      "America/Danmarkshavn",
-      "Etc/GMT"
-    ]
-  },
-  {
-    "value": "GMT Standard Time",
-    "abbr": "GMT",
-    "offset": 0,
-    "isdst": false,
-    "text": "(UTC) Edinburgh, London",
-    "utc": [
-      "Europe/Isle_of_Man",
-      "Europe/Guernsey",
-      "Europe/Jersey",
-      "Europe/London"
-    ]
-  },
-  {
-    "value": "British Summer Time",
-    "abbr": "BST",
-    "offset": 1,
-    "isdst": true,
-    "text": "(UTC+01:00) Edinburgh, London",
-    "utc": [
-      "Europe/Isle_of_Man",
-      "Europe/Guernsey",
-      "Europe/Jersey",
-      "Europe/London"
-    ]
-  },
-  {
-    "value": "GMT Standard Time",
-    "abbr": "GDT",
-    "offset": 1,
-    "isdst": true,
-    "text": "(UTC) Dublin, Lisbon",
-    "utc": [
-      "Atlantic/Canary",
-      "Atlantic/Faeroe",
-      "Atlantic/Madeira",
-      "Europe/Dublin",
-      "Europe/Lisbon"
-    ]
-  },
-  {
-    "value": "Greenwich Standard Time",
-    "abbr": "GST",
-    "offset": 0,
-    "isdst": false,
-    "text": "(UTC) Monrovia, Reykjavik",
-    "utc": [
-      "Africa/Abidjan",
-      "Africa/Accra",
-      "Africa/Bamako",
-      "Africa/Banjul",
-      "Africa/Bissau",
-      "Africa/Conakry",
-      "Africa/Dakar",
-      "Africa/Freetown",
-      "Africa/Lome",
-      "Africa/Monrovia",
-      "Africa/Nouakchott",
-      "Africa/Ouagadougou",
-      "Africa/Sao_Tome",
-      "Atlantic/Reykjavik",
-      "Atlantic/St_Helena"
-    ]
-  },
-  {
-    "value": "W. Europe Standard Time",
-    "abbr": "WEDT",
-    "offset": 2,
-    "isdst": true,
-    "text": "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
-    "utc": [
-      "Arctic/Longyearbyen",
-      "Europe/Amsterdam",
-      "Europe/Andorra",
-      "Europe/Berlin",
-      "Europe/Busingen",
-      "Europe/Gibraltar",
-      "Europe/Luxembourg",
-      "Europe/Malta",
-      "Europe/Monaco",
-      "Europe/Oslo",
-      "Europe/Rome",
-      "Europe/San_Marino",
-      "Europe/Stockholm",
-      "Europe/Vaduz",
-      "Europe/Vatican",
-      "Europe/Vienna",
-      "Europe/Zurich"
-    ]
-  },
-  {
-    "value": "Central Europe Standard Time",
-    "abbr": "CEDT",
-    "offset": 2,
-    "isdst": true,
-    "text": "(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague",
-    "utc": [
-      "Europe/Belgrade",
-      "Europe/Bratislava",
-      "Europe/Budapest",
-      "Europe/Ljubljana",
-      "Europe/Podgorica",
-      "Europe/Prague",
-      "Europe/Tirane"
-    ]
-  },
-  {
-    "value": "Romance Standard Time",
-    "abbr": "RDT",
-    "offset": 2,
-    "isdst": true,
-    "text": "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris",
-    "utc": [
-      "Africa/Ceuta",
-      "Europe/Brussels",
-      "Europe/Copenhagen",
-      "Europe/Madrid",
-      "Europe/Paris"
-    ]
-  },
-  {
-    "value": "Central European Standard Time",
-    "abbr": "CEDT",
-    "offset": 2,
-    "isdst": true,
-    "text": "(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb",
-    "utc": [
-      "Europe/Sarajevo",
-      "Europe/Skopje",
-      "Europe/Warsaw",
-      "Europe/Zagreb"
-    ]
-  },
-  {
-    "value": "W. Central Africa Standard Time",
-    "abbr": "WCAST",
-    "offset": 1,
-    "isdst": false,
-    "text": "(UTC+01:00) West Central Africa",
-    "utc": [
-      "Africa/Algiers",
-      "Africa/Bangui",
-      "Africa/Brazzaville",
-      "Africa/Douala",
-      "Africa/Kinshasa",
-      "Africa/Lagos",
-      "Africa/Libreville",
-      "Africa/Luanda",
-      "Africa/Malabo",
-      "Africa/Ndjamena",
-      "Africa/Niamey",
-      "Africa/Porto-Novo",
-      "Africa/Tunis",
-      "Etc/GMT-1"
-    ]
-  },
-  {
-    "value": "Namibia Standard Time",
-    "abbr": "NST",
-    "offset": 1,
-    "isdst": false,
-    "text": "(UTC+01:00) Windhoek",
-    "utc": [
-      "Africa/Windhoek"
-    ]
-  },
-  {
-    "value": "GTB Standard Time",
-    "abbr": "GDT",
-    "offset": 3,
-    "isdst": true,
-    "text": "(UTC+02:00) Athens, Bucharest",
-    "utc": [
-      "Asia/Nicosia",
-      "Europe/Athens",
-      "Europe/Bucharest",
-      "Europe/Chisinau"
-    ]
-  },
-  {
-    "value": "Middle East Standard Time",
-    "abbr": "MEDT",
-    "offset": 3,
-    "isdst": true,
-    "text": "(UTC+02:00) Beirut",
-    "utc": [
-      "Asia/Beirut"
-    ]
-  },
-  {
-    "value": "Egypt Standard Time",
-    "abbr": "EST",
-    "offset": 2,
-    "isdst": false,
-    "text": "(UTC+02:00) Cairo",
-    "utc": [
-      "Africa/Cairo"
-    ]
-  },
-  {
-    "value": "Syria Standard Time",
-    "abbr": "SDT",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+02:00) Damascus",
-    "utc": [
-      "Asia/Damascus"
-    ]
-  },
-  {
-    "value": "E. Europe Standard Time",
-    "abbr": "EEDT",
-    "offset": 3,
-    "isdst": true,
-    "text": "(UTC+02:00) E. Europe",
-    "utc": [
-      "Asia/Nicosia",
-      "Europe/Athens",
-      "Europe/Bucharest",
-      "Europe/Chisinau",
-      "Europe/Helsinki",
-      "Europe/Kyiv",
-      "Europe/Mariehamn",
-      "Europe/Nicosia",
-      "Europe/Riga",
-      "Europe/Sofia",
-      "Europe/Tallinn",
-      "Europe/Uzhhorod",
-      "Europe/Vilnius",
-      "Europe/Zaporizhzhia"
-
-    ]
-  },
-  {
-    "value": "South Africa Standard Time",
-    "abbr": "SAST",
-    "offset": 2,
-    "isdst": false,
-    "text": "(UTC+02:00) Harare, Pretoria",
-    "utc": [
-      "Africa/Blantyre",
-      "Africa/Bujumbura",
-      "Africa/Gaborone",
-      "Africa/Harare",
-      "Africa/Johannesburg",
-      "Africa/Kigali",
-      "Africa/Lubumbashi",
-      "Africa/Lusaka",
-      "Africa/Maputo",
-      "Africa/Maseru",
-      "Africa/Mbabane",
-      "Etc/GMT-2"
-    ]
-  },
-  {
-    "value": "FLE Standard Time",
-    "abbr": "FDT",
-    "offset": 3,
-    "isdst": true,
-    "text": "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius",
-    "utc": [
-      "Europe/Helsinki",
-      "Europe/Kyiv",
-      "Europe/Mariehamn",
-      "Europe/Riga",
-      "Europe/Sofia",
-      "Europe/Tallinn",
-      "Europe/Uzhhorod",
-      "Europe/Vilnius",
-      "Europe/Zaporizhzhia"
-    ]
-  },
-  {
-    "value": "Turkey Standard Time",
-    "abbr": "TDT",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+03:00) Istanbul",
-    "utc": [
-      "Europe/Istanbul"
-    ]
-  },
-  {
-    "value": "Israel Standard Time",
-    "abbr": "JDT",
-    "offset": 3,
-    "isdst": true,
-    "text": "(UTC+02:00) Jerusalem",
-    "utc": [
-      "Asia/Jerusalem"
-    ]
-  },
-  {
-    "value": "Libya Standard Time",
-    "abbr": "LST",
-    "offset": 2,
-    "isdst": false,
-    "text": "(UTC+02:00) Tripoli",
-    "utc": [
-      "Africa/Tripoli"
-    ]
-  },
-  {
-    "value": "Jordan Standard Time",
-    "abbr": "JST",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+03:00) Amman",
-    "utc": [
-      "Asia/Amman"
-    ]
-  },
-  {
-    "value": "Arabic Standard Time",
-    "abbr": "AST",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+03:00) Baghdad",
-    "utc": [
-      "Asia/Baghdad"
-    ]
-  },
-  {
-    "value": "Kaliningrad Standard Time",
-    "abbr": "KST",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+02:00) Kaliningrad",
-    "utc": [
-      "Europe/Kaliningrad"
-    ]
-  },
-  {
-    "value": "Arab Standard Time",
-    "abbr": "AST",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+03:00) Kuwait, Riyadh",
-    "utc": [
-      "Asia/Aden",
-      "Asia/Bahrain",
-      "Asia/Kuwait",
-      "Asia/Qatar",
-      "Asia/Riyadh"
-    ]
-  },
-  {
-    "value": "E. Africa Standard Time",
-    "abbr": "EAST",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+03:00) Nairobi",
-    "utc": [
-      "Africa/Addis_Ababa",
-      "Africa/Asmera",
-      "Africa/Dar_es_Salaam",
-      "Africa/Djibouti",
-      "Africa/Juba",
-      "Africa/Kampala",
-      "Africa/Khartoum",
-      "Africa/Mogadishu",
-      "Africa/Nairobi",
-      "Antarctica/Syowa",
-      "Etc/GMT-3",
-      "Indian/Antananarivo",
-      "Indian/Comoro",
-      "Indian/Mayotte"
-    ]
-  },
-  {
-    "value": "Moscow Standard Time",
-    "abbr": "MSK",
-    "offset": 3,
-    "isdst": false,
-    "text": "(UTC+03:00) Moscow, St. Petersburg, Volgograd, Minsk",
-    "utc": [
-	    "Europe/Kirov",
-      "Europe/Moscow",
-      "Europe/Simferopol",
-      "Europe/Volgograd",
-      "Europe/Minsk"
-    ]
-  },
-  {
-    "value": "Samara Time",
-    "abbr": "SAMT",
-    "offset": 4,
-    "isdst": false,
-    "text": "(UTC+04:00) Samara, Ulyanovsk, Saratov",
-    "utc": [
-	    "Europe/Astrakhan",
-      "Europe/Samara",
-	    "Europe/Ulyanovsk"
-    ]
-  },
-  {
-    "value": "Iran Standard Time",
-    "abbr": "IDT",
-    "offset": 4.5,
-    "isdst": true,
-    "text": "(UTC+03:30) Tehran",
-    "utc": [
-      "Asia/Tehran"
-    ]
-  },
-  {
-    "value": "Arabian Standard Time",
-    "abbr": "AST",
-    "offset": 4,
-    "isdst": false,
-    "text": "(UTC+04:00) Abu Dhabi, Muscat",
-    "utc": [
-      "Asia/Dubai",
-      "Asia/Muscat",
-      "Etc/GMT-4"
-    ]
-  },
-  {
-    "value": "Azerbaijan Standard Time",
-    "abbr": "ADT",
-    "offset": 5,
-    "isdst": true,
-    "text": "(UTC+04:00) Baku",
-    "utc": [
-      "Asia/Baku"
-    ]
-  },
-  {
-    "value": "Mauritius Standard Time",
-    "abbr": "MST",
-    "offset": 4,
-    "isdst": false,
-    "text": "(UTC+04:00) Port Louis",
-    "utc": [
-      "Indian/Mahe",
-      "Indian/Mauritius",
-      "Indian/Reunion"
-    ]
-  },
-  {
-    "value": "Georgian Standard Time",
-    "abbr": "GET",
-    "offset": 4,
-    "isdst": false,
-    "text": "(UTC+04:00) Tbilisi",
-    "utc": [
-      "Asia/Tbilisi"
-    ]
-  },
-  {
-    "value": "Caucasus Standard Time",
-    "abbr": "CST",
-    "offset": 4,
-    "isdst": false,
-    "text": "(UTC+04:00) Yerevan",
-    "utc": [
-      "Asia/Yerevan"
-    ]
-  },
-  {
-    "value": "Afghanistan Standard Time",
-    "abbr": "AST",
-    "offset": 4.5,
-    "isdst": false,
-    "text": "(UTC+04:30) Kabul",
-    "utc": [
-      "Asia/Kabul"
-    ]
-  },
-  {
-    "value": "West Asia Standard Time",
-    "abbr": "WAST",
-    "offset": 5,
-    "isdst": false,
-    "text": "(UTC+05:00) Ashgabat, Tashkent",
-    "utc": [
-      "Antarctica/Mawson",
-      "Asia/Aqtau",
-      "Asia/Aqtobe",
-      "Asia/Ashgabat",
-      "Asia/Dushanbe",
-      "Asia/Oral",
-      "Asia/Samarkand",
-      "Asia/Tashkent",
-      "Etc/GMT-5",
-      "Indian/Kerguelen",
-      "Indian/Maldives"
-    ]
-  },
-  {
-    "value": "Yekaterinburg Time",
-    "abbr": "YEKT",
-    "offset": 5,
-    "isdst": false,
-    "text": "(UTC+05:00) Yekaterinburg",
-    "utc": [
-      "Asia/Yekaterinburg"
-    ]
-  },
-  {
-    "value": "Pakistan Standard Time",
-    "abbr": "PKT",
-    "offset": 5,
-    "isdst": false,
-    "text": "(UTC+05:00) Islamabad, Karachi",
-    "utc": [
-      "Asia/Karachi"
-    ]
-  },
-  {
-    "value": "India Standard Time",
-    "abbr": "IST",
-    "offset": 5.5,
-    "isdst": false,
-    "text": "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi",
-    "utc": [
-      "Asia/Kolkata",
-      "Asia/Calcutta"
-    ]
-  },
-  {
-    "value": "Sri Lanka Standard Time",
-    "abbr": "SLST",
-    "offset": 5.5,
-    "isdst": false,
-    "text": "(UTC+05:30) Sri Jayawardenepura",
-    "utc": [
-      "Asia/Colombo"
-    ]
-  },
-  {
-    "value": "Nepal Standard Time",
-    "abbr": "NST",
-    "offset": 5.75,
-    "isdst": false,
-    "text": "(UTC+05:45) Kathmandu",
-    "utc": [
-      "Asia/Kathmandu"
-    ]
-  },
-  {
-    "value": "Central Asia Standard Time",
-    "abbr": "CAST",
-    "offset": 6,
-    "isdst": false,
-    "text": "(UTC+06:00) Nur-Sultan (Astana)",
-    "utc": [
-      "Antarctica/Vostok",
-      "Asia/Almaty",
-      "Asia/Bishkek",
-      "Asia/Qyzylorda",
-      "Asia/Urumqi",
-      "Etc/GMT-6",
-      "Indian/Chagos"
-    ]
-  },
-  {
-    "value": "Bangladesh Standard Time",
-    "abbr": "BST",
-    "offset": 6,
-    "isdst": false,
-    "text": "(UTC+06:00) Dhaka",
-    "utc": [
-      "Asia/Dhaka",
-      "Asia/Thimphu"
-    ]
-  },
-  {
-    "value": "Myanmar Standard Time",
-    "abbr": "MST",
-    "offset": 6.5,
-    "isdst": false,
-    "text": "(UTC+06:30) Yangon (Rangoon)",
-    "utc": [
-      "Asia/Rangoon",
-      "Indian/Cocos"
-    ]
-  },
-  {
-    "value": "SE Asia Standard Time",
-    "abbr": "SAST",
-    "offset": 7,
-    "isdst": false,
-    "text": "(UTC+07:00) Bangkok, Hanoi, Jakarta",
-    "utc": [
-      "Antarctica/Davis",
-      "Asia/Bangkok",
-      "Asia/Hovd",
-      "Asia/Jakarta",
-      "Asia/Phnom_Penh",
-      "Asia/Pontianak",
-      "Asia/Saigon",
-      "Asia/Vientiane",
-      "Etc/GMT-7",
-      "Indian/Christmas"
-    ]
-  },
-  {
-    "value": "N. Central Asia Standard Time",
-    "abbr": "NCAST",
-    "offset": 7,
-    "isdst": false,
-    "text": "(UTC+07:00) Novosibirsk",
-    "utc": [
-      "Asia/Novokuznetsk",
-      "Asia/Novosibirsk",
-      "Asia/Omsk",
-      "Asia/Tomsk"
-    ]
-  },
-  {
-    "value": "China Standard Time",
-    "abbr": "CST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi",
-    "utc": [
-      "Asia/Hong_Kong",
-      "Asia/Macau",
-      "Asia/Shanghai"
-    ]
-  },
-  {
-    "value": "North Asia Standard Time",
-    "abbr": "NAST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Krasnoyarsk",
-    "utc": [
-      "Asia/Krasnoyarsk"
-    ]
-  },
-  {
-    "value": "Singapore Standard Time",
-    "abbr": "MPST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Kuala Lumpur, Singapore",
-    "utc": [
-      "Asia/Brunei",
-      "Asia/Kuala_Lumpur",
-      "Asia/Kuching",
-      "Asia/Makassar",
-      "Asia/Manila",
-      "Asia/Singapore",
-      "Etc/GMT-8"
-    ]
-  },
-  {
-    "value": "W. Australia Standard Time",
-    "abbr": "WAST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Perth",
-    "utc": [
-      "Antarctica/Casey",
-      "Australia/Perth"
-    ]
-  },
-  {
-    "value": "Taipei Standard Time",
-    "abbr": "TST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Taipei",
-    "utc": [
-      "Asia/Taipei"
-    ]
-  },
-  {
-    "value": "Ulaanbaatar Standard Time",
-    "abbr": "UST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Ulaanbaatar",
-    "utc": [
-      "Asia/Choibalsan",
-      "Asia/Ulaanbaatar"
-    ]
-  },
-  {
-    "value": "North Asia East Standard Time",
-    "abbr": "NAEST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Irkutsk",
-    "utc": [
-      "Asia/Irkutsk"
-    ]
-  },
-  {
-    "value": "Japan Standard Time",
-    "abbr": "JST",
-    "offset": 9,
-    "isdst": false,
-    "text": "(UTC+09:00) Osaka, Sapporo, Tokyo",
-    "utc": [
-      "Asia/Dili",
-      "Asia/Jayapura",
-      "Asia/Tokyo",
-      "Etc/GMT-9",
-      "Pacific/Palau"
-    ]
-  },
-  {
-    "value": "Korea Standard Time",
-    "abbr": "KST",
-    "offset": 9,
-    "isdst": false,
-    "text": "(UTC+09:00) Seoul",
-    "utc": [
-      "Asia/Pyongyang",
-      "Asia/Seoul"
-    ]
-  },
-  {
-    "value": "Cen. Australia Standard Time",
-    "abbr": "CAST",
-    "offset": 9.5,
-    "isdst": false,
-    "text": "(UTC+09:30) Adelaide",
-    "utc": [
-      "Australia/Adelaide",
-      "Australia/Broken_Hill"
-    ]
-  },
-  {
-    "value": "AUS Central Standard Time",
-    "abbr": "ACST",
-    "offset": 9.5,
-    "isdst": false,
-    "text": "(UTC+09:30) Darwin",
-    "utc": [
-      "Australia/Darwin"
-    ]
-  },
-  {
-    "value": "E. Australia Standard Time",
-    "abbr": "EAST",
-    "offset": 10,
-    "isdst": false,
-    "text": "(UTC+10:00) Brisbane",
-    "utc": [
-      "Australia/Brisbane",
-      "Australia/Lindeman"
-    ]
-  },
-  {
-    "value": "AUS Eastern Standard Time",
-    "abbr": "AEST",
-    "offset": 10,
-    "isdst": false,
-    "text": "(UTC+10:00) Canberra, Melbourne, Sydney",
-    "utc": [
-      "Australia/Melbourne",
-      "Australia/Sydney"
-    ]
-  },
-  {
-    "value": "West Pacific Standard Time",
-    "abbr": "WPST",
-    "offset": 10,
-    "isdst": false,
-    "text": "(UTC+10:00) Guam, Port Moresby",
-    "utc": [
-      "Antarctica/DumontDUrville",
-      "Etc/GMT-10",
-      "Pacific/Guam",
-      "Pacific/Port_Moresby",
-      "Pacific/Saipan",
-      "Pacific/Truk"
-    ]
-  },
-  {
-    "value": "Tasmania Standard Time",
-    "abbr": "TST",
-    "offset": 10,
-    "isdst": false,
-    "text": "(UTC+10:00) Hobart",
-    "utc": [
-      "Australia/Currie",
-      "Australia/Hobart"
-    ]
-  },
-  {
-    "value": "Yakutsk Standard Time",
-    "abbr": "YST",
-    "offset": 9,
-    "isdst": false,
-    "text": "(UTC+09:00) Yakutsk",
-    "utc": [
-      "Asia/Chita",
-      "Asia/Khandyga",
-      "Asia/Yakutsk"
-    ]
-  },
-  {
-    "value": "Central Pacific Standard Time",
-    "abbr": "CPST",
-    "offset": 11,
-    "isdst": false,
-    "text": "(UTC+11:00) Solomon Is., New Caledonia",
-    "utc": [
-      "Antarctica/Macquarie",
-      "Etc/GMT-11",
-      "Pacific/Efate",
-      "Pacific/Guadalcanal",
-      "Pacific/Kosrae",
-      "Pacific/Noumea",
-      "Pacific/Ponape"
-    ]
-  },
-  {
-    "value": "Vladivostok Standard Time",
-    "abbr": "VLAT",
-    "offset": 10,
-    "isdst": false,
-    "text": "(UTC+10:00) Vladivostok",
-    "utc": [
-      "Asia/Ust-Nera",
-      "Asia/Vladivostok"
-    ]
-  },
-  {
-    "value": "Sakhalin Standard Time",
-    "abbr": "SAKT",
-    "offset": 11,
-    "isdst": false,
-    "text": "(UTC+11:00) Sakhalin",
-    "utc": [
-      "Asia/Sakhalin"
-    ]
-  },
-
-  {
-    "value": "New Zealand Standard Time",
-    "abbr": "NZST",
-    "offset": 12,
-    "isdst": false,
-    "text": "(UTC+12:00) Auckland, Wellington",
-    "utc": [
-      "Antarctica/McMurdo",
-      "Pacific/Auckland"
-    ]
-  },
-  {
-    "value": "UTC+12",
-    "abbr": "U",
-    "offset": 12,
-    "isdst": false,
-    "text": "(UTC+12:00) Coordinated Universal Time+12",
-    "utc": [
-      "Etc/GMT-12",
-      "Pacific/Funafuti",
-      "Pacific/Kwajalein",
-      "Pacific/Majuro",
-      "Pacific/Nauru",
-      "Pacific/Tarawa",
-      "Pacific/Wake",
-      "Pacific/Wallis"
-    ]
-  },
-  {
-    "value": "Fiji Standard Time",
-    "abbr": "FST",
-    "offset": 12,
-    "isdst": false,
-    "text": "(UTC+12:00) Fiji",
-    "utc": [
-      "Pacific/Fiji"
-    ]
-  },
-  {
-    "value": "Magadan Standard Time",
-    "abbr": "MST",
-    "offset": 12,
-    "isdst": false,
-    "text": "(UTC+12:00) Magadan",
-    "utc": [
-      "Asia/Anadyr",
-      "Asia/Kamchatka",
-      "Asia/Magadan",
-      "Asia/Srednekolymsk"
-    ]
-  },
-  {
-    "value": "Kamchatka Standard Time",
-    "abbr": "KDT",
-    "offset": 13,
-    "isdst": true,
-    "text": "(UTC+12:00) Petropavlovsk-Kamchatsky - Old",
-    "utc": [
-      "Asia/Kamchatka"
-    ]
-  },
-  {
-    "value": "Tonga Standard Time",
-    "abbr": "TST",
-    "offset": 13,
-    "isdst": false,
-    "text": "(UTC+13:00) Nuku'alofa",
-    "utc": [
-      "Etc/GMT-13",
-      "Pacific/Enderbury",
-      "Pacific/Fakaofo",
-      "Pacific/Tongatapu"
-    ]
-  },
-  {
-    "value": "Samoa Standard Time",
-    "abbr": "SST",
-    "offset": 13,
-    "isdst": false,
-    "text": "(UTC+13:00) Samoa",
-    "utc": [
-      "Pacific/Apia"
-    ]
-  }
-]
-
-const ALL_ZONES = [...new Set(TIMEZONE_DATA.flatMap(z => z.utc))];
-const OFFSET_CACHE = new Map();
-
-const SEARCH_INDEX = TIMEZONE_DATA.flatMap(zone =>
-  zone.utc.map(id => ({
-    id,
-    search: [
-      id,
-      zone.text,
-      zone.value,
-      zone.abbr,
-      zone.utc.join(" ")
-    ].join(" ").toLowerCase()
-  }))
-);
-
-function zoneDisplayName(zone) {
-  return zone.split('/').pop().replace(/_/g, ' ');
-}
-
-function zoneOffsetLabel(zone) {
-  if (OFFSET_CACHE.has(zone)) return OFFSET_CACHE.get(zone);
-
-  try {
-    const value = new Intl.DateTimeFormat("en-US", {
-      timeZone: zone,
-      timeZoneName: "shortOffset"
-    }).formatToParts(new Date()).find(p => p.type === "timeZoneName")?.value || "";
-
-    OFFSET_CACHE.set(zone, value);
-    return value;
-  } catch {
-    return "";
-  }
-}
-
-const tzSearch = document.getElementById("tzSearch");
-const tzResults = document.getElementById("tzResults");
-
-let searchTimer;
-
-tzSearch.addEventListener("input", e => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => renderTzResults(e.target.value), 60);
-});
-
-tzSearch.addEventListener("focus", e => renderTzResults(e.target.value));
-
-function renderTzResults(query) {
-  tzResults.innerHTML = "";
-
-  const q = query.trim().toLowerCase();
-
-  let matches = !q
-    ? ["", ...POPULAR_ZONES.filter(z => z).slice(0, 12)]
-    : SEARCH_INDEX
-        .filter(z => z.search.includes(q))
-        .map(z => z.id)
-        .slice(0, 25);
-
-  if (q && ("local".includes(q) || "device".includes(q)))
-    matches.unshift("");
-
-  matches.forEach(z => {
-    const row = document.createElement("div");
-    row.className = "tz-result";
-
-    const label = document.createElement("span");
-    label.textContent = z === "" ? "Local (device)" : `${zoneDisplayName(z)} — ${z}`;
-
-    const offset = document.createElement("span");
-    offset.className = "tz-offset";
-    offset.textContent = z === "" ? "" : zoneOffsetLabel(z);
-
-    row.append(label, offset);
-
-    row.onclick = () => {
-      state.timezone = z;
-      applyState();
-      tzResults.classList.remove("open");
-      tzSearch.blur();
-    };
-
-    tzResults.appendChild(row);
-  });
-
-  tzResults.classList.toggle("open", matches.length > 0);
-}
-
-document.addEventListener("click", e => {
-  if (!e.target.closest(".tz-picker"))
-    tzResults.classList.remove("open");
-});
-
-tzSearch.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    tzResults.classList.remove("open");
-    e.stopPropagation();
-  }
-});
-
-function updateEyebrow() {
-  document.querySelector(".eyebrow").textContent =
-    state.timezone ? zoneDisplayName(state.timezone) : "Local Time";
-}
-
-  // Keeps the clock's on-screen size from ever overflowing the viewport,
-  // no matter which Clock Size is selected or how narrow the window is.
-  function fitToScreen() {
-    const activeEl = state.style === 'classic'
-      ? document.querySelector('.classic-clock')
-      : document.querySelector('.board');
-    if (!activeEl) return;
-    const naturalWidth = activeEl.offsetWidth;
-    const naturalHeight = activeEl.offsetHeight;
-    if (!naturalWidth || !naturalHeight) return;
-    const baseScale = SIZE_SCALE[state.size] || 1;
-    const maxByWidth = (window.innerWidth * 0.92) / naturalWidth;
-    const maxByHeight = (window.innerHeight * 0.85) / naturalHeight;
-    const applied = Math.min(baseScale, maxByWidth, maxByHeight);
-    root.style.setProperty('--scale', applied > 0 ? applied : baseScale);
-  }
-
   function applyState() {
     root.setAttribute('data-theme', state.theme);
-    root.setAttribute('data-style', state.style);
     root.setAttribute('data-size', state.size);
-    root.setAttribute('data-bg', state.bg);
-
-    document.querySelectorAll('.swatch-row[data-theme]').forEach(r => r.classList.toggle('active', r.dataset.theme === state.theme));
-    document.querySelectorAll('#styleSeg button').forEach(b => b.classList.toggle('active', b.dataset.style === state.style));
-    document.querySelectorAll('#formatSeg button').forEach(b => b.classList.toggle('active', b.dataset.format === state.format));
-    document.querySelectorAll('#sizeSeg button').forEach(b => b.classList.toggle('active', b.dataset.size === state.size));
-    document.querySelectorAll('#bgSeg button').forEach(b => b.classList.toggle('active', b.dataset.bg === state.bg));
-    document.querySelectorAll('#dateFormatSeg button').forEach(b => b.classList.toggle('active', b.dataset.datefmt === state.dateFormat));
-
-    document.getElementById('secondsToggle').checked = state.seconds;
-    document.getElementById('secColon').style.display = state.seconds ? '' : 'none';
-    document.getElementById('s0').style.display = state.seconds ? '' : 'none';
-    document.getElementById('s1').style.display = state.seconds ? '' : 'none';
-
-    document.getElementById('dateToggle').checked = state.showDate;
-    document.getElementById('date').style.display = state.showDate ? '' : 'none';
-    document.getElementById('classicDate').style.display = state.showDate ? '' : 'none';
-    document.getElementById('dateFormatSeg').style.display = state.showDate ? '' : 'none';
-
-    document.getElementById('glowToggle').checked = state.glow;
-    body.classList.toggle('no-ambient', !state.glow);
-    if (state.glow) {
-      root.style.removeProperty('--glow');
-    } else {
-      root.style.setProperty('--glow', 'none');
-    }
-
-    tzSearch.value = state.timezone ? zoneDisplayName(state.timezone) : '';
-    document.getElementById('tzCurrent').textContent = state.timezone
-      ? `Showing ${state.timezone} (${zoneOffsetLabel(state.timezone)})`
-      : 'Showing local time';
-    updateEyebrow();
-
-    try { localStorage.setItem('clockState', JSON.stringify(state)); } catch (e) {}
-    refreshIdleMode();
-    updateClock();
-    fitToScreen();
+    document.querySelectorAll('.swatch-row[data-theme]').forEach(r =>
+      r.classList.toggle('active', r.dataset.theme === state.theme));
+    document.querySelectorAll('#sizeSeg button').forEach(b =>
+      b.classList.toggle('active', b.dataset.size === state.size));
   }
-
-  try {
-    const saved = JSON.parse(localStorage.getItem('clockState'));
-    if (saved) {
-      if (!VALID_THEMES.includes(saved.theme)) delete saved.theme;
-      Object.assign(state, saved);
-    }
-  } catch (e) {}
 
   document.querySelectorAll('.swatch-row[data-theme]').forEach(row => {
     row.addEventListener('click', () => { state.theme = row.dataset.theme; applyState(); });
   });
-  document.querySelectorAll('#styleSeg button').forEach(btn => {
-    btn.addEventListener('click', () => { state.style = btn.dataset.style; applyState(); });
-  });
-  document.querySelectorAll('#formatSeg button').forEach(btn => {
-    btn.addEventListener('click', () => { state.format = btn.dataset.format; applyState(); });
-  });
   document.querySelectorAll('#sizeSeg button').forEach(btn => {
     btn.addEventListener('click', () => { state.size = btn.dataset.size; applyState(); });
   });
-  document.querySelectorAll('#bgSeg button').forEach(btn => {
-    btn.addEventListener('click', () => { state.bg = btn.dataset.bg; applyState(); });
-  });
-  document.querySelectorAll('#dateFormatSeg button').forEach(btn => {
-    btn.addEventListener('click', () => { state.dateFormat = btn.dataset.datefmt; applyState(); });
-  });
-  document.getElementById('secondsToggle').addEventListener('change', (e) => {
-    state.seconds = e.target.checked; applyState();
-  });
-  document.getElementById('dateToggle').addEventListener('change', (e) => {
-    state.showDate = e.target.checked; applyState();
-  });
-  document.getElementById('glowToggle').addEventListener('change', (e) => {
-    state.glow = e.target.checked; applyState();
-  });
-  document.getElementById('resetAllBtn').addEventListener('click', () => {
-    Object.assign(state, defaultState);
-    applyState();
-  });
 
-  // ----- Settings panel toggle -----
   const settingsBtn = document.getElementById('settingsBtn');
   const panel = document.getElementById('settingsPanel');
-  const panelCloseBtn = document.getElementById('panelCloseBtn');
   settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.toggle('open'); });
-  panelCloseBtn.addEventListener('click', () => panel.classList.remove('open'));
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.controls')) panel.classList.remove('open');
   });
 
-// ----- Fullscreen -----
-const fsBtn = document.getElementById("fullscreenBtn");
-const controls = document.querySelector(".controls");
-
-function isFullscreen() {
-  return !!document.fullscreenElement ||
-         (window.innerWidth >= screen.width - 2 &&
-          window.innerHeight >= screen.height - 2);
-}
-
-function updateFullscreenUI() {
-  const fullscreen = isFullscreen();
-
-  controls.style.display = fullscreen ? "none" : "flex";
-
-  fsBtn.textContent = fullscreen ? "✕" : "⛶";
-  fsBtn.title = fullscreen
-    ? "Exit fullscreen (or press F)"
-    : "Fullscreen (or press F)";
-}
-
-async function toggleFullscreen() {
-  try {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    } else {
-      await document.documentElement.requestFullscreen();
-    }
-  } catch (err) {
-    console.error(err);
-  }
-
-  updateFullscreenUI();
-}
-
-fsBtn.addEventListener("click", toggleFullscreen);
-
-document.addEventListener("fullscreenchange", updateFullscreenUI);
-window.addEventListener("resize", updateFullscreenUI);
-
-// ----- Keyboard shortcuts -----
-document.addEventListener("keydown", (e) => {
-  if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
-
-  switch (e.key.toLowerCase()) {
-    case "f":
-      e.preventDefault();
-      toggleFullscreen();
-      break;
-
-    case "escape":
-      panel.classList.remove("open");
-      break;
-  }
-});
-
-// Initialize
-applyState();
-updateFullscreenUI();
+  applyState();
 </script>
 </body>
 </html>
